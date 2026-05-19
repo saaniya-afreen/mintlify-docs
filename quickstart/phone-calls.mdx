@@ -147,11 +147,16 @@ curl -X POST http://13.207.23.185:8000/v1/phone-numbers \
   -H "Content-Type: application/json" \
   -d '{
     "phone_number": "+14155551234",
-    "credential_id": "<twilio_integration_id>",
+    "friendly_name": "Support Line",
+    "provider": "twilio",
     "agent_id": "<agent_id>",
-    "name": "Support Line"
+    "credential_id": "<twilio_integration_id>"
   }'
 ```
+
+<Info>
+Advanced setups can pass `provider_config` (SIP trunk address, username, password) instead — see [Register phone number](/api-reference/phone-numbers/register-phone-number).
+</Info>
 
 <Check>
 **Save:** the phone number you registered. Call it from your mobile to test inbound.
@@ -173,7 +178,7 @@ Your agent **dials** a phone number and starts a conversation — like a sales o
 
 ---
 
-**Replace** `<agent_id>`, `<api_key>`, and the target `phone_number` (must include country code, e.g. `+1...`).
+**Replace** `<agent_id>`, `<api_key>`, `to_number`, and `from_number` (your registered number).
 
 ```bash
 curl -X POST http://13.207.23.185:8000/v1/calls \
@@ -181,10 +186,18 @@ curl -X POST http://13.207.23.185:8000/v1/calls \
   -H "Content-Type: application/json" \
   -d '{
     "agent_id": "<agent_id>",
-    "phone_number": "+14155559876",
+    "to_number": "+14155559876",
+    "from_number": "+15739693824",
     "variables": { "customer_name": "Sam" }
   }'
 ```
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `to_number` | Yes | Number to dial (E.164, e.g. `+14155559876`) |
+| `from_number` | Yes | Your registered OneInbox/Twilio number |
+| `variables` | No | Per-call context for the agent prompt |
+| `webhook_url` | No | Override webhook for this call only |
 
 **What success looks like:**
 
@@ -193,9 +206,9 @@ curl -X POST http://13.207.23.185:8000/v1/calls \
 ```json
 {
   "id": "call_xyz789",
-  "status": "queued",
-  "agent_id": "agent_abc123",
-  "phone_number": "+14155559876"
+  "status": "initiated",
+  "to_number": "+14155559876",
+  "from_number": "+15739693824"
 }
 ```
 
