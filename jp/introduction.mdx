@@ -23,13 +23,19 @@ flowchart LR
   TTS --> User
 ```
 
-| レイヤー | 設定内容 | デフォルト |
-| --- | --- | --- |
-| **STT** | プロバイダ、モデル、言語 | OneInbox デフォルト |
-| **LLM** | モデル、システムプロンプト、ツール、ナレッジベース | OneInbox デフォルト |
-| **TTS** | プロバイダ、ボイス、速度 | OneInbox デフォルト |
+| レイヤー | 設定内容 |
+| --- | --- |
+| **STT** | プロバイダ、モデル、言語 |
+| **LLM** | モデル、システムプロンプト、ツール、ナレッジベース |
+| **TTS** | プロバイダ、ボイス、速度 |
 
 OneInbox が各レイヤーをリアルタイムで接続します。**エージェントの言動**に集中できます。
+
+| 用語 | 意味 |
+| --- | --- |
+| **STT**（音声認識） | 発話者の音声をテキストに変換 |
+| **LLM**（言語モデル） | エージェントが何と返すかを決定 |
+| **TTS**（音声合成） | エージェントのテキスト応答を音声に変換 |
 
 ---
 
@@ -47,7 +53,7 @@ OneInbox が各レイヤーをリアルタイムで接続します。**エージ
   <Card title="クイックスタート" icon="rocket" href="/jp/guides/quickstart">
     3 ステップで最初の音声エージェント（約 15 分）
   </Card>
-  <Card title="API リファレンス" icon="code" href="/api-reference/integrations/create-integration">
+  <Card title="API リファレンス" icon="code" href="/api-reference/agents/create-agent">
     全エンドポイント（Try It 対応）
   </Card>
 </CardGroup>

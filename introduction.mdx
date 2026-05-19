@@ -23,13 +23,19 @@ flowchart LR
   TTS --> User
 ```
 
-| Layer | You configure | Default |
-| --- | --- | --- |
-| **STT** | Provider, model, language | OneInbox default |
-| **LLM** | Model, system prompt, tools, knowledge bases | OneInbox default |
-| **TTS** | Provider, voice, speed | OneInbox default |
+| Layer | You configure |
+| --- | --- |
+| **STT** | Provider, model, language |
+| **LLM** | Model, system prompt, tools, knowledge bases |
+| **TTS** | Provider, voice, speed |
 
 OneInbox connects these layers in real time. You focus on **what the agent says and does**.
+
+| Term | Meaning |
+| --- | --- |
+| **STT** (speech-to-text) | Converts what the caller says into text |
+| **LLM** (language model) | Decides what the agent should reply |
+| **TTS** (text-to-speech) | Converts the agent's text reply into spoken audio |
 
 ---
 
@@ -47,7 +53,7 @@ OneInbox connects these layers in real time. You focus on **what the agent says 
   <Card title="Quickstart" icon="rocket" href="/guides/quickstart">
     Build your first voice agent in 3 steps (~15 min)
   </Card>
-  <Card title="API reference" icon="code" href="/api-reference/integrations/create-integration">
+  <Card title="API reference" icon="code" href="/api-reference/agents/create-agent">
     Every endpoint with interactive Try It examples
   </Card>
 </CardGroup>

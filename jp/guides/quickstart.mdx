@@ -38,6 +38,8 @@ flowchart LR
 
 API キーをコピーし、以下の curl すべてで `Authorization: Bearer <api_key>` を使用します。詳細 → [認証](/jp/concepts/authentication)
 
+**各ステップの実行方法:** ターミナル（Mac）、PowerShell、または WSL を開きます。curl コマンドをコピーし、プレースホルダー（例: `<api_key>` → 実際のキー）を置き換え、ターミナルに貼り付けて Enter を押します。JSON レスポンスに `"id"` があれば成功です。
+
 電話番号・ベンダー連携は不要です。[インテグレーション](/jp/concepts/integrations)は BYOK やテレフォニーキャリアが必要な場合のみ任意です。
 
 ---
@@ -87,11 +89,15 @@ curl -X POST http://13.207.23.185:8000/v1/models \
 | `401` | API キー誤り | ダッシュボードから完全なキーをコピー |
 | `400` | モデル設定が無効 | 上記 JSON に合わせる |
 
+レスポンスの `"id"`（例: `model_abc123`）をコピーします。ステップ 2 の `<llm_id>` に貼り付けます。
+
 ---
 
 ## 2) エージェントを作成
 
 **音声エージェント**全体 — STT、LLM、TTS、通話ルールを組み立てます。ステップ 1 の `llm_id` を指定します。
+
+以下の curl の `<llm_id>` を、ステップ 1 でコピーした `"id"` に置き換えます。
 
 | 部分 | フィールド | このガイド |
 | --- | --- | --- |
@@ -151,11 +157,15 @@ curl -X POST http://13.207.23.185:8000/v1/agents \
 | `404` on llm_id | LLM ID 誤り | ステップ 1 から再コピー |
 | `400` | transcriber/tts 設定誤り | 上記 JSON を使用 |
 
+レスポンスの `"id"`（例: `agent_abc123`）をコピーします。ステップ 3 の `<agent_id>` に貼り付けます。
+
 ---
 
 ## 3) Web 通話を作成
 
 **Web 通話** — OneInbox 上の音声セッションを API で作成します（`POST /v1/calls/web`）。このステップは API のみです。`call_id` を返し、ステータスとトランスクリプトはポーリングで取得します。
+
+`<agent_id>` をステップ 2 でコピーした `"id"` に置き換えます。
 
 ```bash
 curl -X POST http://13.207.23.185:8000/v1/calls/web \
@@ -184,6 +194,17 @@ curl -X POST http://13.207.23.185:8000/v1/calls/web \
 | エラー | 意味 | 対処 |
 | --- | --- | --- |
 | `404` on agent_id | エージェント ID 誤り | ステップ 2 から再コピー |
+
+**完了の確認:** レスポンスに `"id"`、`"server_url"`、`"participant_token"` があれば Web 通話セッションの作成に成功しています。このステップでは **マイクはまだ使えません** — OneInbox 上にセッションを作るだけです。
+
+ブラウザでエージェントと **聞き・話す** には [Web SDK](/jp/concepts/web-sdk) へ進んでください。通話ステータスを確認する場合:
+
+```bash
+curl http://13.207.23.185:8000/v1/calls/<call_id> \
+  -H "Authorization: Bearer <api_key>"
+```
+
+`"status": "completed"` になるまで待ち、`transcript` を確認します。
 
 ---
 
