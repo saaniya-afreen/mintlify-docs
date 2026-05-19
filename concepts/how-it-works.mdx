@@ -5,7 +5,7 @@ description: What happens when someone talks to your agent.
 
 ## The loop
 
-On every call, audio goes through three steps in a loop:
+On every call, audio cycles through three stages:
 
 ```mermaid
 sequenceDiagram
@@ -26,36 +26,41 @@ sequenceDiagram
 | **LLM** | Model, system prompt, tools, knowledge bases |
 | **TTS** | Provider, voice, speed |
 
-OneInbox handles streaming, turn-taking, and call control. You focus on **what the agent says**.
+OneInbox handles streaming, turn-taking, and call control.
 
 ---
 
 ## What OneInbox runs for you
 
-- Real-time audio streaming between STT, LLM, and TTS
-- Detecting when the user stops speaking
-- Ending the call on silence timeout or end phrases
-- Saving transcripts and call metadata
-- Routing phone calls through Twilio
+- Real-time audio between STT, LLM, and TTS
+- End-of-speech detection
+- Silence timeout and end phrases
+- Transcripts and call metadata
+- Telephony routing for phone calls
+- Web call session tokens (`server_url`, `participant_token`)
 
-You do **not** run WebRTC servers, SIP trunks, or audio pipelines.
+You do **not** run WebRTC servers or SIP infrastructure yourself.
+
+---
+
+## Call types
+
+| Type | What it is | Guide |
+| --- | --- | --- |
+| **Web call** | API session via `POST /v1/calls/web` | [Web calls](/guides/web-calls) |
+| **Web SDK** | Browser client that joins a web call | [Web SDK](/concepts/web-sdk) |
+| **Outbound phone** | Agent dials a number | [Phone calls](/guides/phone-calls) |
+| **Inbound phone** | Caller reaches your number | [Phone calls](/guides/phone-calls) |
 
 ---
 
 ## One agent, many calls
 
-Create an agent once. Reuse it for:
-
-- Browser test calls (dev)
-- Outbound campaigns to different numbers
-- Inbound on a shared phone line
-
-Pass per-call data with `variables` — no need to clone agents.
+Create once. Pass per-call context with `variables` — no need to clone agents.
 
 ---
 
-## Next
+## Next steps
 
-- **[Build your first agent](/quickstart/first-agent)** — 5-step walkthrough
-- **[Resources](/concepts/resources)** — how API objects connect
-- **[Agents](/concepts/agents)** — STT, TTS, and call behavior
+- **[Quickstart](/guides/quickstart)**
+- **[Agents](/concepts/agents)**

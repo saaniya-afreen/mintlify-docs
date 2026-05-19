@@ -3,21 +3,17 @@ title: Authentication
 description: How to authenticate API requests with your OneInbox API key.
 ---
 
-Every OneInbox API request uses one credential: your **API key** (`oi_live_...`).
+Every OneInbox API request uses one credential: your **API key**.
 
 ---
 
 ## Get your API key
 
-1. Log in to the **OneInbox dashboard** (URL provided during onboarding)
+1. Log in to the [OneInbox dashboard](https://oneinbox-dashboard.vercel.app)
 2. Open **API Keys**
 3. Click **Create API key**, give it a name, and copy the key
 
-<Warning>
-The full API key is shown **only once**. Store it somewhere safe (password manager, secrets vault). If you lose it, create a new key and revoke the old one from the dashboard.
-</Warning>
-
-Accounts are created by the OneInbox team during onboarding — there is no self-service sign-up in the API docs.
+You can view and manage keys anytime from the dashboard — create new keys or revoke old ones as needed.
 
 ---
 
@@ -44,11 +40,11 @@ curl http://13.207.23.185:8000/v1/agents \
 
 **Symptom:** `401 Unauthorized` on any endpoint.
 
-**Fix:** Check you copied the full key (starts with `oi_live_`) and used `Authorization: Bearer <api_key>`.
+**Fix:** Copy the full key from the dashboard and use `Authorization: Bearer <api_key>`.
 
-### Lost your API key
+### Revoked or lost key
 
-You cannot retrieve it again. Log in to the dashboard → **API Keys** → create a new key and revoke the old one if needed.
+Create a new key in the dashboard and revoke the old one if needed.
 
 ---
 
@@ -56,7 +52,7 @@ You cannot retrieve it again. Log in to the dashboard → **API Keys** → creat
 
 | Action | Where |
 | --- | --- |
-| Create or revoke API keys | OneInbox dashboard → **API Keys** |
+| Create or revoke API keys | [Dashboard](https://oneinbox-dashboard.vercel.app) → **API Keys** |
 | Call agents, models, calls, etc. | `Authorization: Bearer <api_key>` on every request |
 
-Full walkthrough → **[Build your first agent](/quickstart/first-agent)**
+Full walkthrough → **[Quickstart](/guides/quickstart)**

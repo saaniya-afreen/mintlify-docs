@@ -1,42 +1,63 @@
 ---
 title: はじめに
-description: 5つのAPI呼び出しで音声AIエージェントを構築。
+description: OneInbox は音声オーケストレーションプラットフォームです。このドキュメントでは API とアクセス方法を説明します。
 ---
 
-OneInbox は **音声 AI エージェント**用の REST API です。エージェントを作成し、電話またはブラウザでテストできます。
+## OneInbox とは
 
-**初めての方は** [クイックスタート](/jp/quickstart/first-agent) から — 各 curl をコピーし、ID を保存して次のステップへ。
+OneInbox は、電話と Web 上で **ライブ音声会話**を処理する AI エージェントを構築するための **音声オーケストレーションプラットフォーム**です。
+
+このドキュメントでは **REST API** と、OneInbox をプロダクトに組み込む方法を説明します。エージェント・モデル・通話を API で設定し、リアルタイム音声・テレフォニー・スケーリングは OneInbox が担当します。
 
 ---
 
-## 5つのステップ（順番通り）
+## 音声エージェントの仕組み
 
-| ステップ | 内容 | 保存する ID |
+通話中、次のループが繰り返されます:
+
+```mermaid
+flowchart LR
+  User([発話]) --> STT[音声認識]
+  STT --> LLM[言語モデル]
+  LLM --> TTS[音声合成]
+  TTS --> User
+```
+
+| レイヤー | 設定内容 | デフォルト |
 | --- | --- | --- |
-| 1 | ダッシュボードで API キー取得 | `api_key` |
-| 2 | OpenAI キーを保存 | `credential_id` |
-| 3 | LLM モデル（プロンプト） | `llm_id` |
-| 4 | エージェント（STT + LLM + TTS） | `agent_id` |
-| 5 | ブラウザテスト通話 | meet リンクを開く |
+| **STT** | プロバイダ、モデル、言語 | OneInbox デフォルト |
+| **LLM** | モデル、システムプロンプト、ツール、ナレッジベース | OneInbox デフォルト |
+| **TTS** | プロバイダ、ボイス、速度 | OneInbox デフォルト |
 
-<Info>
-ドキュメントでは **インテグレーション** と表記。API パスは `/v1/credentials` です。ダッシュボード URL はオンボーディング時に共有されます。
-</Info>
+OneInbox が各レイヤーをリアルタイムで接続します。**エージェントの言動**に集中できます。
 
 ---
 
-## パスを選ぶ
+## 構築できるもの
+
+- **アウトバウンド** — リードへの発信、リマインダー
+- **インバウンドサポート** — 電話番号に着信するとエージェントが応答
+- **Web 音声** — OneInbox Web SDK でサイトに音声ウィジェットを埋め込み
+
+---
+
+## はじめに
 
 <CardGroup cols={2}>
-  <Card title="最初のエージェント" icon="rocket" href="/jp/quickstart/first-agent">
-    約5分。ブラウザでテストまで。
-  </Card>
-  <Card title="電話通話" icon="phone" href="/quickstart/phone-calls">
-    Twilio で発信・着信
+  <Card title="クイックスタート" icon="rocket" href="/jp/guides/quickstart">
+    3 ステップで最初の音声エージェント（約 15 分）
   </Card>
   <Card title="API リファレンス" icon="code" href="/api-reference/integrations/create-integration">
     全エンドポイント（Try It 対応）
   </Card>
 </CardGroup>
 
-→ **[最初のエージェントを作る](/jp/quickstart/first-agent)**
+API キーは [OneInbox ダッシュボード](https://oneinbox-dashboard.vercel.app) で作成・管理します。
+
+---
+
+## 次のステップ
+
+- **[クイックスタート](/jp/guides/quickstart)** — 前提条件、3 ステップ、curl ウォークスルー
+- **[仕組み](/jp/concepts/how-it-works)** — 音声パイプラインの説明
+- **[エージェント](/jp/concepts/agents)** — STT、LLM、TTS、通話ルール

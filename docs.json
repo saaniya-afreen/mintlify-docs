@@ -2,7 +2,7 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "OneInbox",
-  "description": "The developer platform for voice AI agents",
+  "description": "Voice orchestration platform for AI agents",
   "colors": {
     "primary": "#2563EB",
     "light": "#EFF6FF",
@@ -30,6 +30,10 @@
         "navbar": {
           "links": [
             {
+              "label": "Dashboard",
+              "href": "https://oneinbox-dashboard.vercel.app"
+            },
+            {
               "label": "API",
               "href": "http://13.207.23.185:8000"
             }
@@ -37,7 +41,7 @@
           "primary": {
             "type": "button",
             "label": "Quickstart",
-            "href": "/quickstart/first-agent"
+            "href": "/guides/quickstart"
           }
         },
         "tabs": [
@@ -46,15 +50,14 @@
             "groups": [
               {
                 "group": "Get started",
-                "pages": [
-                  "introduction",
-                  "quickstart/first-agent",
-                  "quickstart/phone-calls"
-                ]
+                "pages": ["introduction"]
               },
               {
                 "group": "Guides",
                 "pages": [
+                  "guides/quickstart",
+                  "guides/phone-calls",
+                  "guides/web-calls",
                   "guides/tools",
                   "guides/webhooks",
                   "guides/knowledge-bases",
@@ -65,10 +68,10 @@
                 "group": "Core concepts",
                 "pages": [
                   "concepts/how-it-works",
-                  "concepts/resources",
                   "concepts/authentication",
                   "concepts/integrations",
-                  "concepts/agents"
+                  "concepts/agents",
+                  "concepts/web-sdk"
                 ]
               }
             ]
@@ -84,6 +87,10 @@
         "navbar": {
           "links": [
             {
+              "label": "ダッシュボード",
+              "href": "https://oneinbox-dashboard.vercel.app"
+            },
+            {
               "label": "API",
               "href": "http://13.207.23.185:8000"
             }
@@ -91,7 +98,7 @@
           "primary": {
             "type": "button",
             "label": "クイックスタート",
-            "href": "/jp/quickstart/first-agent"
+            "href": "/jp/guides/quickstart"
           }
         },
         "tabs": [
@@ -100,29 +107,28 @@
             "groups": [
               {
                 "group": "はじめる",
-                "pages": [
-                  "jp/introduction",
-                  "jp/quickstart/first-agent",
-                  "quickstart/phone-calls"
-                ]
+                "pages": ["jp/introduction"]
               },
               {
                 "group": "ガイド",
                 "pages": [
-                  "guides/tools",
-                  "guides/webhooks",
-                  "guides/knowledge-bases",
-                  "guides/voices"
+                  "jp/guides/quickstart",
+                  "jp/guides/phone-calls",
+                  "jp/guides/web-calls",
+                  "jp/guides/tools",
+                  "jp/guides/webhooks",
+                  "jp/guides/knowledge-bases",
+                  "jp/guides/voices"
                 ]
               },
               {
                 "group": "コアコンセプト",
                 "pages": [
                   "jp/concepts/how-it-works",
-                  "jp/concepts/resources",
                   "jp/concepts/authentication",
                   "jp/concepts/integrations",
-                  "jp/concepts/agents"
+                  "jp/concepts/agents",
+                  "jp/concepts/web-sdk"
                 ]
               }
             ]

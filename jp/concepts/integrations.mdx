@@ -1,16 +1,72 @@
 ---
 title: インテグレーション
-description: OpenAI、Twilio、ElevenLabs などの API キーを安全に保存。
+description: 任意 — サードパーティ API キーを OneInbox に保存（BYOK）。
 ---
 
-**インテグレーション** = 暗号化されたサードパーティ API キー。
+## インテグレーションとは
 
-<Info>
-API パスは `/v1/credentials`。フィールド名は `credential_id` の場合あり。
-</Info>
+**インテグレーション**は、OneInbox 内に安全に保存されるサードパーティ API キーです。
 
-| プロバイダー | `provider` | 用途 |
-| --- | --- | --- |
-| OpenAI | `openai` | LLM |
-| Twilio | `twilio` | 電話 |
-| ElevenLabs | `elevenlabs` | カスタム音声 |
+- OneInbox がキーを **暗号化** して保存
+- 作成後、生のキーは **返却されない**
+- 他の API 呼び出しでは `id` で参照
+
+---
+
+## いつ必要か
+
+クイックスタートには **不要** — OneInbox がデフォルトの LLM / STT / TTS を提供。**自社のベンダー課金** やカスタムボイスが必要なときに追加します。
+
+| 用途 | タイミング |
+| --- | --- |
+| **自社 LLM 課金** | 自社 LLM アカウント（BYOK）を使う場合 |
+| **テレフォニー** | 電話通話（発信・着信） |
+| **カスタムボイス** | カスタムまたはクローンボイスのインポート |
+
+---
+
+## 作成方法
+
+```bash
+curl -X POST http://13.207.23.185:8000/v1/credentials \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "OpenAI Production",
+    "provider": "openai",
+    "api_key": "<your_provider_api_key>"
+  }'
+```
+
+---
+
+## インテグレーションのつながり
+
+```
+インテグレーション（任意 BYOK）
+        │
+        ▼
+一致する "provider" の LLM モデル
+        │
+        ▼
+エージェント（llm_id）→ 通話
+```
+
+テレフォニーインテグレーションは、番号検索・登録の `credential_id` 経由で [電話通話](/jp/guides/phone-calls) を支えます。
+
+---
+
+## インテグレーションの管理
+
+```bash
+curl http://13.207.23.185:8000/v1/credentials \
+  -H "Authorization: Bearer <api_key>"
+```
+
+---
+
+## 次のステップ
+
+- **[電話通話](/jp/guides/phone-calls)** — テレフォニーインテグレーション
+- **[ボイス](/jp/guides/voices)** — カスタムボイスのインポート
+- **[インテグレーション作成](/api-reference/integrations/create-integration)** — API リファレンス

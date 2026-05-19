@@ -1,27 +1,27 @@
 ---
-title: Tools
-description: Give your agent actions — call APIs, transfer, or end the call.
+title: ツール
+description: エージェントにアクションを付与 — API 呼び出し、転送、通話終了。
 ---
 
-## Before you start
+## 開始前
 
-**You need:** an `api_key` and an LLM model. Attach tools via `tool_ids` when you create or update a model.
+**必要なもの:** `api_key` と LLM モデル。モデル作成・更新時に `tool_ids` でツールを紐付けます。
 
-**Tool types in the API:**
+**API のツール種別:**
 
-| Type | What it does |
+| 種別 | 動作 |
 | --- | --- |
-| `api_call` | Agent calls your HTTP endpoint |
-| `transfer_call` | Transfer to a human phone number |
-| `end_call` | Agent hangs up |
+| `api_call` | エージェントが HTTP エンドポイントを呼び出す |
+| `transfer_call` | 人間の電話番号へ転送 |
+| `end_call` | エージェントが通話を切断 |
 
 ---
 
 <Steps>
 
-<Step title="1. Create a tool">
+<Step title="1. ツールを作成">
 
-**Example — call your API:**
+**例 — 自社 API を呼び出す:**
 
 ```bash
 curl -X POST http://13.207.23.185:8000/v1/tools \
@@ -40,7 +40,7 @@ curl -X POST http://13.207.23.185:8000/v1/tools \
   }'
 ```
 
-**Transfer to a human:**
+**人間へ転送:**
 
 ```bash
 curl -X POST http://13.207.23.185:8000/v1/tools \
@@ -54,7 +54,7 @@ curl -X POST http://13.207.23.185:8000/v1/tools \
   }'
 ```
 
-**End the call:**
+**通話終了:**
 
 ```bash
 curl -X POST http://13.207.23.185:8000/v1/tools \
@@ -69,11 +69,11 @@ curl -X POST http://13.207.23.185:8000/v1/tools \
 
 </Step>
 
-<Step title="2. Attach tools to your LLM model">
+<Step title="2. LLM モデルにツールを紐付け">
 
-**Goal:** The agent can use the tools during calls.
+**目的:** 通話中にエージェントがツールを使えるようにします。
 
-Update your model (or set `tool_ids` when creating it):
+モデルを更新（または作成時に `tool_ids` を設定）:
 
 ```bash
 curl -X PATCH http://13.207.23.185:8000/v1/models/<llm_id> \
@@ -84,22 +84,22 @@ curl -X PATCH http://13.207.23.185:8000/v1/models/<llm_id> \
   }'
 ```
 
-Your agent already linked to this `llm_id` picks up the change automatically.
+この `llm_id` にリンク済みのエージェントは自動的に変更を反映します。
 
 </Step>
 
-<Step title="3. List or manage tools">
+<Step title="3. ツールの一覧・管理">
 
 ```bash
-# List all
+# 一覧
 curl http://13.207.23.185:8000/v1/tools \
   -H "Authorization: Bearer <api_key>"
 
-# Get one
+# 1 件取得
 curl http://13.207.23.185:8000/v1/tools/<tool_id> \
   -H "Authorization: Bearer <api_key>"
 
-# Delete
+# 削除
 curl -X DELETE http://13.207.23.185:8000/v1/tools/<tool_id> \
   -H "Authorization: Bearer <api_key>"
 ```
@@ -110,6 +110,6 @@ curl -X DELETE http://13.207.23.185:8000/v1/tools/<tool_id> \
 
 ---
 
-## API reference
+## API リファレンス
 
-[Create tool](/api-reference/tools/create-tool) · [List tools](/api-reference/tools/list-tools) · [Update tool](/api-reference/tools/update-tool)
+[ツール作成](/api-reference/tools/create-tool) · [ツール一覧](/api-reference/tools/list-tools) · [ツール更新](/api-reference/tools/update-tool)

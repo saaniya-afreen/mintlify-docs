@@ -1,42 +1,31 @@
 ---
 title: Integrations
-description: How to store OpenAI, Twilio, and other provider keys in OneInbox.
+description: Optionally store third-party provider keys in OneInbox (BYOK).
 ---
 
 ## What is an integration?
 
 An **integration** is a third-party API key stored securely inside OneInbox.
 
-**Real-world analogy:** You're giving OneInbox a copy of your house key (OpenAI, Twilio, etc.) so it can use that service on your behalf during calls — without you sending the key on every request.
-
 - OneInbox **encrypts** the key at rest
-- The raw key is **never** returned after you create the integration
-- You reference integrations by their `id` in other API calls
-
-<Info>
-**Docs say "Integration".** The API path is `/v1/credentials`. Some fields say `credential_id` — same ID.
-</Info>
+- The raw key is **never** returned after creation
+- You reference integrations by `id` in other API calls
 
 ---
 
 ## When do you need one?
 
-| Provider | You need it when… |
-| --- | --- |
-| **OpenAI** | Your agent uses GPT (required for first-agent guide) |
-| **Twilio** | You want phone calls (outbound or inbound) |
-| **ElevenLabs** | You want to import a custom/cloned voice |
-| **Gemini** | You want Google's models instead of OpenAI |
+Integrations are **optional** for the first-agent quickstart — OneInbox provides default LLM, STT, and TTS. Add integrations when you want **your own vendor billing** or custom voices.
 
-For the basic browser test, you only need **OpenAI**.
+| Use case | You need it when… |
+| --- | --- |
+| **Custom LLM billing** | You want your own LLM account (BYOK) |
+| **Telephony** | Phone calls (outbound or inbound) |
+| **Custom voices** | Import a custom or cloned voice |
 
 ---
 
 ## How to create one
-
-**Step 1:** Get your provider's API key (e.g. `sk-...` from OpenAI).
-
-**Step 2:** POST to OneInbox with your OneInbox `api_key`:
 
 ```bash
 curl -X POST http://13.207.23.185:8000/v1/credentials \
@@ -45,65 +34,33 @@ curl -X POST http://13.207.23.185:8000/v1/credentials \
   -d '{
     "name": "OpenAI Production",
     "provider": "openai",
-    "api_key": "<your_openai_api_key>"
+    "api_key": "<your_provider_api_key>"
   }'
 ```
 
-**Step 3:** Save the `"id"` from the response — that's your integration ID.
 
 ---
 
-## Supported providers
-
-| Provider | `provider` value | Key to paste | Used for |
-| --- | --- | --- | --- |
-| OpenAI | `openai` | OpenAI API key (`sk-...`) | LLM (GPT) |
-| Google Gemini | `gemini` | Gemini API key | LLM |
-| Twilio | `twilio` | **Auth Token** (not Account SID) | Phone numbers + calls |
-| ElevenLabs | `elevenlabs` | ElevenLabs API key | Custom voices |
-| Cartesia | `cartesia` | Cartesia API key | Custom voices |
-| Deepgram | `deepgram` | Deepgram API key | Optional custom STT/TTS |
-
-<Warning>
-**Twilio:** Use your **Auth Token**, not your Account SID. Find it in Twilio Console → Account → Auth Token.
-</Warning>
-
----
-
-## How integrations connect to other resources
+## How integrations connect
 
 ```
-You create:     Integration (OpenAI)
-                      │
-                      ▼
-You create:     LLM model with "provider": "openai"
-                      │
-                      ▼
-OneInbox uses:  Your stored OpenAI key automatically
+Integration (optional BYOK)
+        │
+        ▼
+LLM model with matching "provider"
+        │
+        ▼
+Agent (llm_id) → Calls
 ```
 
-For Twilio:
-
-```
-Integration (Twilio)  →  credential_id on phone number search/register
-Integration (Twilio)  →  used when placing outbound calls
-```
+Telephony integrations power [Phone calls](/guides/phone-calls) via `credential_id` on number search/register.
 
 ---
 
 ## Manage integrations
 
 ```bash
-# List all
 curl http://13.207.23.185:8000/v1/credentials \
-  -H "Authorization: Bearer <api_key>"
-
-# Get one
-curl http://13.207.23.185:8000/v1/credentials/<credential_id> \
-  -H "Authorization: Bearer <api_key>"
-
-# Delete
-curl -X DELETE http://13.207.23.185:8000/v1/credentials/<credential_id> \
   -H "Authorization: Bearer <api_key>"
 ```
 
@@ -111,6 +68,6 @@ curl -X DELETE http://13.207.23.185:8000/v1/credentials/<credential_id> \
 
 ## Next steps
 
-- **[Build your first agent](/quickstart/first-agent)** — add OpenAI integration (step 2)
-- **[Phone calls](/quickstart/phone-calls)** — add Twilio integration
+- **[Phone calls](/guides/phone-calls)** — telephony integration
+- **[Voices](/guides/voices)** — custom voice import
 - **[Create integration](/api-reference/integrations/create-integration)** — API reference

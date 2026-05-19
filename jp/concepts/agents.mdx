@@ -1,13 +1,86 @@
 ---
 title: エージェント
-description: STT、LLM、TTS、通話設定をひとつにまとめた音声 AI。
+description: エージェントの構成とすべての設定項目の説明。
 ---
 
-| パーツ | 役割 |
-| --- | --- |
-| Transcriber (STT) | 音声をテキストに |
-| LLM モデル | 返答を生成 |
-| TTS | 音声で話す |
-| 通話設定 | 最初の挨拶、タイムアウト |
+## エージェントとは
 
-1 エージェントで多数の同時通話が可能です。
+**エージェント**は音声 AI 発信者 — STT、LLM、TTS、会話ルールを 1 つのリソースにまとめたものです。
+
+| 部分 | フィールド | 役割 |
+| --- | --- | --- |
+| 頭脳 | `llm_id` | LLM モデルによる性格と指示 |
+| 耳 | `transcriber` | 音声 → テキスト |
+| 声 | `tts` | テキスト → 音声 |
+| 振る舞い | 挨拶、タイムアウト、フレーズ | 通話フロー |
+
+---
+
+## 1 回作成、何度でも利用
+
+1 つのエージェントで以下が可能:
+
+- **`POST /v1/calls/web`** による Web 通話 — [Web 通話](/jp/guides/web-calls)
+- [Web SDK](/jp/concepts/web-sdk) によるブラウザ音声
+- **アウトバウンド**および**インバウンド**電話通話
+- エージェントを複製せず通話ごとの **`variables`**
+
+任意: `webhook_id`、`interruption_sensitivity`、`enable_recording`。
+
+---
+
+## 主要フィールド
+
+### `transcriber`
+
+| フィールド | 例 |
+| --- | --- |
+| `provider` | デフォルト STT |
+| `model` | デフォルト STT |
+| `language` | `en` |
+
+### `tts`
+
+| フィールド | 例 |
+| --- | --- |
+| `provider` | デフォルトボイス |
+| `voice_id` | デフォルトボイス |
+| `speed` | `1.0` |
+| `stability` | `0.5` |
+
+### 振る舞い
+
+| フィールド | 用途 |
+| --- | --- |
+| `first_message` | 最初の挨拶 |
+| `end_call_phrases` | ユーザーが言うと切断 |
+| `silence_timeout_seconds` | 無音で終了 |
+| `max_duration_seconds` | 時間上限 |
+| `interruption_sensitivity` | 0.0–1.0 |
+| `enable_recording` | 通話音声の録音 |
+
+---
+
+## 完全な例
+
+→ **[クイックスタート](/jp/guides/quickstart)** ステップ 2 · [エージェント作成](/api-reference/agents/create-agent)
+
+---
+
+## エージェントの更新
+
+```bash
+curl -X PATCH http://13.207.23.185:8000/v1/agents/<agent_id> \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{ "first_message": "Hello! Thanks for calling." }'
+```
+
+---
+
+## 次のステップ
+
+- **[クイックスタート](/jp/guides/quickstart)**
+- **[電話通話](/jp/guides/phone-calls)**
+- **[Web 通話](/jp/guides/web-calls)**
+- **[Web SDK](/jp/concepts/web-sdk)**

@@ -1,0 +1,206 @@
+---
+title: Web SDK
+description: Embed browser voice with the OneInbox Web SDK (@oneinbox/web-sdk).
+---
+
+## What is the Web SDK?
+
+The **Web SDK** (`@oneinbox/web-sdk`) is OneInbox's **frontend library** for browser voice. It connects your user's browser to an active [web call](/guides/web-calls) session.
+
+It does **not** create web calls. Your backend creates the web call via `POST /v1/calls/web` first — see the [Web calls](/guides/web-calls) guide.
+
+---
+
+## What the Web SDK needs
+
+| Value | From |
+| --- | --- |
+| `server_url` | [Web call](/guides/web-calls) response (e.g. `wss://voice.oneinbox.ai`) |
+| `participant_token` | Same response — short-lived, scoped to this session |
+
+Your backend creates the web call, then returns these values to your frontend. The Web SDK never needs your OneInbox API key.
+
+---
+
+## Architecture
+
+```
+User clicks "Talk to AI"
+        │
+        ▼
+ Your Frontend
+ └── POST /api/start-call  ──►  Your Backend
+                                      │
+                            POST /v1/calls/web   ← web call (API)
+                                      │
+                                      ▼
+                               server_url + participant_token
+                                      │
+        ◄─────────────────────────────┘
+        │
+        ▼
+ Web SDK connects in the browser
+        │
+        ▼
+ Live conversation with your agent
+```
+
+---
+
+## What the Web SDK handles
+
+- Connecting to `server_url` with `participant_token`
+- Browser microphone access and audio streaming
+- Call state (connecting, active, ended)
+- Disconnect / end call from the UI
+
+What it does **not** handle:
+
+- Creating agents or LLM models
+- Calling `POST /v1/calls/web` (your backend's job)
+- Storing or using your API key
+
+---
+
+<Steps>
+
+<Step title="1. Backend — broker web call tokens">
+
+Your server creates a [web call](/guides/web-calls) and returns only what the frontend needs:
+
+```javascript
+// server.js (Node.js / Express)
+const express = require('express');
+const app = express();
+app.use(express.json());
+
+app.post('/api/start-call', async (req, res) => {
+  try {
+    const response = await fetch('http://13.207.23.185:8000/v1/calls/web', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.ONEINBOX_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        agent_id: process.env.ONEINBOX_AGENT_ID,
+        variables: {
+          customer_name: req.body.customerName || 'Guest'
+        }
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`OneInbox API error: ${response.status}`);
+    }
+
+    const { id: call_id, server_url, participant_token } = await response.json();
+    res.json({ call_id, server_url, participant_token });
+  } catch (error) {
+    console.error('Failed to start call:', error);
+    res.status(500).json({ error: 'Failed to start call' });
+  }
+});
+
+app.listen(3000);
+```
+
+</Step>
+
+<Step title="2. Frontend — install and connect">
+
+```bash
+npm install @oneinbox/web-sdk
+```
+
+```jsx
+import { useState, useRef } from 'react';
+import { OneinboxCall } from '@oneinbox/web-sdk';
+
+export default function VoiceWidget({ customerName }) {
+  const [status, setStatus] = useState('idle');
+  const callRef = useRef(null);
+
+  async function startCall() {
+    setStatus('connecting');
+    try {
+      const res = await fetch('/api/start-call', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerName })
+      });
+      const { server_url, participant_token } = await res.json();
+
+      const call = new OneinboxCall({
+        serverUrl: server_url,
+        token: participant_token,
+        onStateChange: (state) => setStatus(state),
+        onEnded: () => {
+          setStatus('ended');
+          callRef.current = null;
+        }
+      });
+
+      await call.connect();
+      callRef.current = call;
+      setStatus('active');
+    } catch (error) {
+      console.error('Call failed:', error);
+      setStatus('idle');
+    }
+  }
+
+  async function endCall() {
+    await callRef.current?.disconnect();
+    setStatus('ended');
+  }
+
+  if (status === 'idle') {
+    return <button onClick={startCall}>Talk to AI</button>;
+  }
+  if (status === 'connecting') return <p>Connecting...</p>;
+  if (status === 'active') {
+    return (
+      <div>
+        <span>Connected</span>
+        <button onClick={endCall}>End call</button>
+      </div>
+    );
+  }
+  return <p>Call ended.</p>;
+}
+```
+
+</Step>
+
+</Steps>
+
+---
+
+## Web SDK vs other paths
+
+| Path | What it is | Where |
+| --- | --- | --- |
+| **Web call** | API session on your backend | [Web calls](/guides/web-calls) guide |
+| **Web SDK** | Browser client for that session | This page |
+| **Phone call** | PSTN via telephony carrier | [Phone calls](/guides/phone-calls) guide |
+
+---
+
+## Troubleshooting
+
+| Problem | Fix |
+| --- | --- |
+| `401` from OneInbox | Check backend API key when creating the web call |
+| Web SDK cannot connect | Confirm fresh `server_url` and `participant_token` from your backend |
+| No audio | Browser mic permission; use HTTPS in production |
+| API key in frontend | Create web calls on the backend only |
+
+---
+
+## Next steps
+
+- **[Web calls](/guides/web-calls)** — create the API session first
+- **[Quickstart](/guides/quickstart)** — first agent + web call
+- **[Agents](/concepts/agents)** — configure STT, LLM, and TTS
+- **[Start web call](/api-reference/calls/start-web-call)** — API reference

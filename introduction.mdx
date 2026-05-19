@@ -1,145 +1,63 @@
 ---
 title: Introduction
-description: What OneInbox is, how voice agents work, and how to build your first agent.
+description: OneInbox is a voice orchestration platform. This documentation covers the API and how to access it.
 ---
 
 ## What is OneInbox?
 
-OneInbox is the API for **voice AI agents** — software that listens, replies, and speaks on phone or browser calls.
+OneInbox is a **voice orchestration platform** for building AI agents that handle live voice conversations over the phone and the web.
 
-You configure the agent with a few API calls. OneInbox handles audio streaming and telephony.
-
-<Card title="Build your first agent" icon="rocket" href="/quickstart/first-agent">
-  Step-by-step walkthrough: API key → OpenAI → LLM → agent → browser test call.
-</Card>
-
-<Card title="API reference" icon="code" href="/api-reference/integrations/create-integration">
-  Try every endpoint in the browser with interactive examples.
-</Card>
+This documentation covers the **REST API** and how to integrate OneInbox into your product. You configure agents, models, and calls with API requests — OneInbox handles real-time audio, telephony, and scaling.
 
 ---
 
-## What you'll build (end result)
+## How voice agents work
 
-By the end of the quickstart you will have:
-
-- An API key from the OneInbox dashboard
-- An agent named something like **Alex** that talks in English
-- A **browser test call** where you speak to Alex through your microphone
-
-You will **not** need a phone number for the first guide. Phone calls come later.
-
----
-
-## Key terms (read before you start)
-
-If you've never built with APIs before, these words appear everywhere:
-
-| Term | Plain English |
-| --- | --- |
-| **API** | A way for your code (or terminal) to talk to OneInbox over the internet |
-| **API key** | Your password for OneInbox API calls. Starts with `oi_live_...`. Create it in the dashboard → **API Keys** |
-| **Integration** | Your OpenAI (or Twilio) key stored safely inside OneInbox. API path: `/v1/credentials` |
-| **LLM model** | The "brain" — which GPT model to use and what instructions it follows (system prompt) |
-| **Agent** | The full voice caller: ears (STT) + brain (LLM) + voice (TTS) + behavior (greeting, timeouts) |
-| **STT** | Speech-to-text — converts what the user **says** into text |
-| **TTS** | Text-to-speech — converts the agent's **reply** into spoken audio |
-| **Call** | A live conversation. Browser test = dev demo. Phone call = real number via Twilio |
-
-<Info>
-In these docs we say **Integration**. In API responses and some fields you'll see `credential_id` — same thing.
-</Info>
-
----
-
-## The 5 steps (do them in order)
-
-Think of it like assembling LEGO blocks. Each step creates one block. Later steps need IDs from earlier steps.
-
-| Step | You create | Why | Save this ID |
-| --- | --- | --- | --- |
-| **1** | API key | Proves requests are from you | `api_key` (from dashboard) |
-| **2** | OpenAI integration | So OneInbox can call OpenAI on your behalf | `credential_id` (optional in basic flow) |
-| **3** | LLM model | Defines personality and which GPT model to use | `llm_id` |
-| **4** | Agent | Wires listening + brain + speaking together | `agent_id` |
-| **5** | Browser test call | Opens a page where you talk to your agent | meet link |
+Every call runs a loop until the conversation ends:
 
 ```mermaid
 flowchart LR
-  A[1. API key] --> B[2. Integration]
-  B --> C[3. LLM model]
-  C --> D[4. Agent]
-  D --> E[5. Call]
-```
-
-**Rule:** Every API request uses `Authorization: Bearer <api_key>`.
-
----
-
-## What happens during a call
-
-When someone talks to your agent, this loop runs until the call ends:
-
-```mermaid
-flowchart LR
-  User([You speak]) --> STT[Agent listens]
-  STT --> LLM[Agent thinks]
-  LLM --> TTS[Agent speaks]
+  User([Caller speaks]) --> STT[Speech-to-text]
+  STT --> LLM[Language model]
+  LLM --> TTS[Text-to-speech]
   TTS --> User
 ```
 
-You choose the providers (e.g. Deepgram for voice, OpenAI for brain). OneInbox connects them in real time.
+| Layer | You configure | Default |
+| --- | --- | --- |
+| **STT** | Provider, model, language | OneInbox default |
+| **LLM** | Model, system prompt, tools, knowledge bases | OneInbox default |
+| **TTS** | Provider, voice, speed | OneInbox default |
+
+OneInbox connects these layers in real time. You focus on **what the agent says and does**.
 
 ---
 
-## Choose your path
+## What you can build
+
+- **Outbound callers** — your agent dials leads, qualifies them, or sends reminders
+- **Inbound support** — assign a phone number; callers reach your agent 24/7
+- **Web voice** — embed a voice widget on your site with the OneInbox Web SDK
+
+---
+
+## Get started
 
 <CardGroup cols={2}>
-  <Card title="First agent (start here)" icon="rocket" href="/quickstart/first-agent">
-    Full walkthrough — browser test, no phone needed
-  </Card>
-  <Card title="Phone calls" icon="phone" href="/quickstart/phone-calls">
-    Real outbound/inbound calls — do the first guide first
-  </Card>
-  <Card title="Authentication explained" icon="key" href="/concepts/authentication">
-    How to get and use your API key
+  <Card title="Quickstart" icon="rocket" href="/guides/quickstart">
+    Build your first voice agent in 3 steps (~15 min)
   </Card>
   <Card title="API reference" icon="code" href="/api-reference/integrations/create-integration">
-    Every endpoint with Try It — test requests in the browser
+    Every endpoint with interactive Try It examples
   </Card>
 </CardGroup>
 
-### Optional (after your first call)
-
-<CardGroup cols={2}>
-  <Card title="Tools" icon="wrench" href="/guides/tools">
-    Agent can call your API, transfer, or hang up
-  </Card>
-  <Card title="Webhooks" icon="webhook" href="/guides/webhooks">
-    Your server gets notified when calls start/end
-  </Card>
-  <Card title="Knowledge bases" icon="book" href="/guides/knowledge-bases">
-    Agent answers from your docs
-  </Card>
-  <Card title="Voices" icon="microphone" href="/guides/voices">
-    Change or import custom voices
-  </Card>
-</CardGroup>
+Create and manage API keys in the [OneInbox dashboard](https://oneinbox-dashboard.vercel.app).
 
 ---
 
-## All API resources
+## Next steps
 
-| Resource | Guide | When you need it |
-| --- | --- | --- |
-| API key | [Authentication](/concepts/authentication) · Dashboard → **API Keys** | Once — before any API call |
-| Integrations | [Concepts](/concepts/integrations) | Store OpenAI, Twilio keys |
-| LLM Models | [Quickstart step 3](/quickstart/first-agent) | Every agent |
-| Agents | [Quickstart step 4](/quickstart/first-agent) | Every agent |
-| Calls | [Quickstart](/quickstart/first-agent) | Start conversations |
-| Phone Numbers | [Phone calls](/quickstart/phone-calls) | Inbound lines |
-| Tools | [Guide](/guides/tools) | Extra agent actions |
-| Webhooks | [Guide](/guides/webhooks) | Server notifications |
-| Knowledge Bases | [Guide](/guides/knowledge-bases) | Doc Q&A |
-| Voices | [Guide](/guides/voices) | Custom TTS |
-| Health | [Health check](/api-reference/health/health-check) | Ping the API |
+- **[Quickstart](/guides/quickstart)** — prerequisites, 3-step path, and curl walkthrough
+- **[How it works](/concepts/how-it-works)** — the voice pipeline explained
+- **[Agents](/concepts/agents)** — STT, LLM, TTS, and call behavior

@@ -1,13 +1,13 @@
 ---
 title: Voices
-description: List built-in voices or import custom ones from ElevenLabs.
+description: List built-in voices or import custom ones from a third-party provider.
 ---
 
 ## Before you start
 
-**Built-in voices** (Deepgram, etc.) work out of the box — set `tts.voice_id` when you [create an agent](/quickstart/first-agent).
+**Built-in voices** work out of the box — set `tts.voice_id` when you [create an agent](/guides/quickstart).
 
-**Custom voices** need an integration for the provider (e.g. ElevenLabs) first.
+**Custom voices** need a third-party provider integration first (e.g. ElevenLabs, Cartesia).
 
 ---
 
@@ -31,9 +31,9 @@ Pick a `voice_id` and use it in your agent's `tts` block.
 
 <Step title="2. Import a custom voice (optional)">
 
-**Goal:** Clone or import a voice from ElevenLabs (or another provider).
+**Goal:** Clone or import a voice from a third-party provider (e.g. ElevenLabs, Cartesia).
 
-First, [add an ElevenLabs integration](/concepts/integrations). Then:
+First, [add an integration](/concepts/integrations) for your provider. Then:
 
 ```bash
 curl -X POST http://13.207.23.185:8000/v1/voices/import \
@@ -50,15 +50,12 @@ curl -X POST http://13.207.23.185:8000/v1/voices/import \
   }'
 ```
 
-<Check>
-**Save:** response `id` as **`voice_id`** — use it in `tts.voice_id` on your agent.
-</Check>
 
 </Step>
 
 <Step title="3. Override voice on a single call (optional)">
 
-When starting a browser test call, you can override TTS without changing the agent — see [Start browser test call](/api-reference/calls/start-browser-test-call) for override fields (Cartesia, ElevenLabs, Deepgram).
+When creating a web call, you can override TTS without changing the agent — see [Start web call](/api-reference/calls/start-web-call) for override fields from third-party providers (e.g. ElevenLabs, Cartesia).
 
 </Step>
 

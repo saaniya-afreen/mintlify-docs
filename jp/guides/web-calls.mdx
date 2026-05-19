@@ -1,0 +1,142 @@
+---
+title: Web 通話
+description: Web 通話セッションの作成と管理。
+---
+
+## 概要
+
+**Web 通話**は OneInbox API で作成する通話セッションです。バックエンドでブラウザ音声を支えるリソースです。
+
+Web 通話を作成すると、OneInbox は `call_id`、`server_url`、`participant_token` を返します。
+
+**前提:** [クイックスタート](/jp/guides/quickstart) で `agent_id` を用意。
+
+---
+
+## 返却値
+
+| フィールド | 用途 |
+| --- | --- |
+| `call_id` | セッション識別 — `GET /v1/calls/<call_id>` でポーリング |
+| `server_url` | WebSocket URL（例: `wss://voice.oneinbox.ai`）— フロントエンドに渡す |
+| `participant_token` | 短期クライアントトークン — フロントに渡す（API キーではない） |
+
+---
+
+<Steps>
+
+<Step title="1. Web 通話を作成">
+
+```bash
+curl -X POST http://13.207.23.185:8000/v1/calls/web \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "<agent_id>",
+    "variables": { "customer_name": "Guest" }
+  }'
+```
+
+<ResponseExample>
+
+```json
+{
+  "id": "call_abc123",
+  "server_url": "wss://voice.oneinbox.ai",
+  "participant_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+</ResponseExample>
+
+</Step>
+
+<Step title="2. 通話ごとのコンテキスト（任意）">
+
+`variables` でプロンプトにコンテキストを注入:
+
+```json
+{
+  "agent_id": "<agent_id>",
+  "variables": {
+    "customer_name": "Sam",
+    "order_id": "ORD-001"
+  }
+}
+```
+
+システムプロンプト: `The customer name is {{customer_name}}.`
+
+</Step>
+
+<Step title="3. 音声・モデルの上書き（任意）">
+
+エージェントを更新せず、1 通話だけ TTS または LLM を変更:
+
+```bash
+curl -X POST http://13.207.23.185:8000/v1/calls/web \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "<agent_id>",
+    "overrides": {
+      "tts": {
+        "provider": "cartesia",
+        "voice_id": "a0e99841-438c-4a64-b679-ae501e7d6091"
+      },
+      "first_message": "Hi! How can I help you today?"
+    }
+  }'
+```
+
+[Web 通話開始](/api-reference/calls/start-web-call) と [ボイス](/jp/guides/voices) を参照。
+
+</Step>
+
+<Step title="4. 通話を確認">
+
+```bash
+curl http://13.207.23.185:8000/v1/calls/<call_id> \
+  -H "Authorization: Bearer <api_key>"
+```
+
+会話終了時に `"status": "completed"` と `transcript` 配列を確認。
+
+</Step>
+
+</Steps>
+
+---
+
+## セキュリティ
+
+フロントには `server_url` と `participant_token` のみ返却 — API キーは露出させない。
+
+---
+
+## Web 通話 vs 電話通話
+
+| | Web 通話 | 電話通話 |
+| --- | --- | --- |
+| **チャネル** | ブラウザ / Web アプリ | テレフォニーキャリア PSTN |
+| **電話番号** | 不要 | 必要 |
+| **テレフォニーインテグレーション** | 不要 | 必要 |
+| **ガイド** | このページ | [電話通話](/jp/guides/phone-calls) |
+
+---
+
+## トラブルシューティング
+
+| 問題 | 対処 |
+| --- | --- |
+| `401` | `Authorization: Bearer <api_key>` を確認 |
+| `404` on agent_id | [クイックスタート](/jp/guides/quickstart) ステップ 2 から `agent_id` を再取得 |
+| ブラウザでトークンが使えない | Web 通話を再作成 — トークンは短期有効 |
+
+---
+
+## 次のステップ
+
+- **[Web 通話開始](/api-reference/calls/start-web-call)** — API リファレンス
+- **[クイックスタート](/jp/guides/quickstart)** — 最初の Web 通話
+- **[電話通話](/jp/guides/phone-calls)** — 実番号への発信

@@ -1,36 +1,58 @@
 ---
 title: 認証
-description: OneInbox API キーでリクエストを認証する方法。
+description: OneInbox API キーによる API リクエストの認証方法。
 ---
 
-OneInbox API のすべてのリクエストには **API キー**（`oi_live_...`）が必要です。
+すべての OneInbox API リクエストには 1 つの認証情報 — **API キー** — が必要です。
 
 ---
 
 ## API キーの取得
 
-1. **OneInbox ダッシュボード**にログイン（オンボーディング時に URL を共有）
+1. [OneInbox ダッシュボード](https://oneinbox-dashboard.vercel.app) にログイン
 2. **API Keys** を開く
 3. **Create API key** をクリックし、名前を付けてキーをコピー
 
-<Warning>
-完全な API キーは**一度だけ**表示されます。安全な場所に保存してください。紛失した場合はダッシュボードで新しいキーを作成し、古いキーを失効させてください。
-</Warning>
-
-アカウントは OneInbox チームがオンボーディング時に作成します。
+ダッシュボードでいつでもキーの作成・失効ができます。
 
 ---
 
-## リクエストヘッダー
+## 送信方法
+
+すべてのリクエストにこのヘッダーを追加:
 
 ```
 Authorization: Bearer <api_key>
 ```
 
+例:
+
+```bash
+curl http://13.207.23.185:8000/v1/agents \
+  -H "Authorization: Bearer <api_key>"
+```
+
 ---
 
-## よくある間違い
+## よくあるエラー
 
-**401 Unauthorized** → `api_key` が欠けている、または間違っています。`oi_live_` で始まる完全なキーを `Authorization: Bearer` に付けてください。
+### API キー欠落または誤り
 
-→ **[最初のエージェントを作る](/jp/quickstart/first-agent)**
+**症状:** 任意のエンドポイントで `401 Unauthorized`。
+
+**対処:** ダッシュボードから完全なキーをコピーし、`Authorization: Bearer <api_key>` を使用。
+
+### 失効または紛失したキー
+
+ダッシュボードで新しいキーを作成し、必要に応じて古いキーを失効してください。
+
+---
+
+## クイックリファレンス
+
+| 操作 | 場所 |
+| --- | --- |
+| API キーの作成・失効 | [ダッシュボード](https://oneinbox-dashboard.vercel.app) → **API Keys** |
+| エージェント、モデル、通話等の呼び出し | すべてのリクエストで `Authorization: Bearer <api_key>` |
+
+完全な手順 → **[クイックスタート](/jp/guides/quickstart)**

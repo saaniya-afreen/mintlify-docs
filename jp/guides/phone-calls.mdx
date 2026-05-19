@@ -1,0 +1,228 @@
+---
+title: 電話通話
+description: テレフォニーキャリア（Twilio、Tenyx 等）によるアウトバウンド・インバウンド通話。
+---
+
+Twilio、Tenyx など **任意のテレフォニーキャリア**で **実際の電話番号**に発信・着信する方法です。先に **[クイックスタート](/jp/guides/quickstart)** を完了し、動作する `agent_id` と `api_key` を用意してください。
+
+**完了時:** エージェントが顧客に発信（アウトバウンド）し、所有番号への着信に応答（インバウンド）できます。
+
+---
+
+## 概要
+
+このガイドで行うこと:
+
+- **テレフォニーインテグレーション**を OneInbox に保存
+- 電話番号を検索・登録（インバウンド）
+- `POST /v1/calls` で **アウトバウンド**発信
+
+---
+
+## 前提条件
+
+| 項目 | 取得先 | 用途 |
+| --- | --- | --- |
+| `api_key` | [ダッシュボード](https://oneinbox-dashboard.vercel.app) | API 認証 |
+| `agent_id` | [クイックスタート](/jp/guides/quickstart) | 通話中のエージェント |
+| キャリアアカウント | Twilio、Tenyx 等 | 電話網 |
+| キャリア認証情報 | 各キャリアのコンソール | `POST /v1/credentials` 用 |
+
+---
+
+## アウトバウンド vs インバウンド
+
+| 種類 | 誰が誰にかける | セットアップ |
+| --- | --- | --- |
+| **アウトバウンド** | エージェントが顧客に発信 | ステップ 4 — `POST /v1/calls` |
+| **インバウンド** | 顧客が自社番号に発信 | ステップ 2–3 — 検索 + 登録 |
+
+---
+
+<Steps>
+
+<Step title="1. テレフォニーインテグレーションを追加">
+
+### 目的
+
+キャリアの認証情報を OneInbox に保存します。
+
+```bash
+curl -X POST http://13.207.23.185:8000/v1/credentials \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Production Telephony",
+    "provider": "twilio",
+    "api_key": "<your_carrier_api_key_or_auth_token>"
+  }'
+```
+
+`provider` と `api_key` をキャリアに合わせて変更 — 例: `twilio` + Auth Token、`tenyx` + Tenyx API キー。
+
+<ResponseExample>
+
+```json
+{
+  "id": "cred_telephony_abc123",
+  "name": "Production Telephony",
+  "provider": "twilio"
+}
+```
+
+</ResponseExample>
+
+</Step>
+
+<Step title="2. 利用可能な番号を検索">
+
+### 目的
+
+登録可能な番号の一覧を取得します。**アウトバウンドのみ**で既に `from_number` がある場合はスキップ可。
+
+検索に対応するキャリア（Twilio 等）:
+
+```bash
+curl "http://13.207.23.185:8000/v1/phone-numbers/search?country=US&area_code=415&limit=10&credential_id=<telephony_integration_id>" \
+  -H "Authorization: Bearer <api_key>"
+```
+
+| クエリパラメータ | 意味 |
+| --- | --- |
+| `country` | ISO 国コード: `US`、`GB`、`IN` 等 |
+| `area_code` | 任意 — 市外局番でフィルタ |
+| `contains` | 任意 — 番号内の桁パターン |
+| `credential_id` | ステップ 1 のテレフォニーインテグレーション ID |
+
+検索非対応のキャリアは、コンソールで取得済みの番号をステップ 3 へ。
+
+</Step>
+
+<Step title="3. 番号を登録（インバウンド）">
+
+### 目的
+
+この番号へのインバウンド着信をエージェントにルーティングします。
+
+**オプション A — インテグレーション ID**（Twilio 等）:
+
+```bash
+curl -X POST http://13.207.23.185:8000/v1/phone-numbers \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phone_number": "+14155551234",
+    "friendly_name": "Support Line",
+    "provider": "twilio",
+    "agent_id": "<agent_id>",
+    "credential_id": "<telephony_integration_id>"
+  }'
+```
+
+**オプション B — SIP トランク**（Tenyx 等、SIP 対応キャリア）:
+
+```bash
+curl -X POST http://13.207.23.185:8000/v1/phone-numbers \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phone_number": "+14155551234",
+    "friendly_name": "Support Line",
+    "provider": "twilio",
+    "agent_id": "<agent_id>",
+    "provider_config": {
+      "trunk_address": "your-carrier.pstn.example.com",
+      "auth_username": "<sip_username>",
+      "auth_password": "<sip_password>"
+    }
+  }'
+```
+
+`provider` はキャリアの値に設定 — [電話番号登録](/api-reference/phone-numbers/register-phone-number) を参照。
+
+</Step>
+
+<Step title="4. アウトバウンド発信">
+
+### 目的
+
+エージェントが電話番号に発信し、会話を開始します。
+
+```bash
+curl -X POST http://13.207.23.185:8000/v1/calls \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "<agent_id>",
+    "to_number": "+919876543210",
+    "from_number": "+15739693824",
+    "variables": { "customer_name": "Sam", "order_id": "ORD-001" },
+    "webhook_url": "https://example.com/per-call-webhook"
+  }'
+```
+
+| フィールド | 必須 | 説明 |
+| --- | --- | --- |
+| `to_number` | はい | E.164 形式 |
+| `from_number` | はい | 登録済みキャリア番号 |
+| `variables` | いいえ | 通話ごとのプロンプトコンテキスト |
+| `webhook_url` | いいえ | この通話だけ Webhook を上書き |
+
+<ResponseExample>
+
+```json
+{
+  "id": "call_xyz789",
+  "status": "initiated",
+  "to_number": "+919876543210",
+  "from_number": "+15739693824"
+}
+```
+
+</ResponseExample>
+
+</Step>
+
+</Steps>
+
+---
+
+## 通話を確認
+
+```bash
+curl http://13.207.23.185:8000/v1/calls/<call_id> \
+  -H "Authorization: Bearer <api_key>"
+```
+
+`"status": "completed"` になるまで待ち、`transcript` を確認。
+
+---
+
+## トラブルシューティング
+
+| 問題 | 原因 | 対処 |
+| --- | --- | --- |
+| `401` | トークン誤り | ダッシュボードの `api_key` を使用 |
+| 番号が無効 | 形式 | E.164: `+14155551234` |
+| 国際発信失敗 | キャリアの地域設定 | キャリアコンソールでアウトバウンドを有効化 |
+| インバウンドでエージェントなし | 登録 | 正しい `agent_id` でステップ 3 をやり直し |
+| キャリア認証情報が無効 | キーまたはトークン誤り | ステップ 1 でインテグレーションを再作成 |
+
+---
+
+## 次のステップ
+
+<CardGroup cols={2}>
+  <Card title="インテグレーション" icon="key" href="/jp/concepts/integrations">
+    テレフォニーと BYOK
+  </Card>
+  <Card title="Webhook" icon="webhook" href="/jp/guides/webhooks">
+    通話イベント
+  </Card>
+  <Card title="エージェント" icon="robot" href="/jp/concepts/agents">
+    音声と挙動の調整
+  </Card>
+  <Card title="API リファレンス" icon="code" href="/api-reference/calls/create-outbound-call">
+    アウトバウンドの全オプション
+  </Card>
+</CardGroup>

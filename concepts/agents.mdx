@@ -1,119 +1,86 @@
 ---
 title: Agents
-description: What an agent is and every setting explained in plain English.
+description: What an agent is and every setting explained.
 ---
 
 ## What is an agent?
 
-An **agent** is your voice AI caller — the complete package that handles a live conversation.
+An **agent** is your voice AI caller — STT, LLM, TTS, and conversation rules in one resource.
 
-If the **LLM model** is the brain, the **agent** is the full person: ears, voice, greeting, and conversation rules.
-
-| Part | Technical name | What it does |
+| Part | Field | Role |
 | --- | --- | --- |
-| Ears | **Transcriber (STT)** | Hears the user and converts speech → text |
-| Brain | **LLM model** (`llm_id`) | Reads text and decides what to reply |
-| Voice | **TTS** | Converts reply text → spoken audio |
-| Behavior | **Call settings** | Greeting, when to hang up, max length |
-
-```mermaid
-flowchart TB
-  subgraph agent [Your Agent]
-    STT[Transcriber · listens]
-    LLM[LLM model · thinks]
-    TTS[Voice · speaks]
-    BEH[Behavior · rules]
-  end
-  STT --> LLM --> TTS
-```
+| Brain | `llm_id` | Personality and instructions via LLM model |
+| Ears | `transcriber` | Speech → text |
+| Voice | `tts` | Text → speech |
+| Behavior | Greeting, timeouts, phrases | Call flow |
 
 ---
 
 ## Create once, use many times
 
-One agent can handle:
+One agent supports:
 
-- Unlimited browser test calls
-- Many outbound calls to different numbers
-- Inbound calls on a shared phone line
+- **Web calls** via `POST /v1/calls/web` — [Web calls](/guides/web-calls)
+- **Browser voice** via the [Web SDK](/concepts/web-sdk)
+- **Outbound** and **inbound** phone calls
+- Per-call **`variables`** without cloning agents
 
-**Personalize per call** with `variables` instead of creating a new agent each time:
-
-```json
-{
-  "agent_id": "agent_abc123",
-  "phone_number": "+14155559876",
-  "variables": { "customer_name": "Sam", "order_id": "12345" }
-}
-```
-
-Reference these in your system prompt: `"The customer's name is {{customer_name}}."`
+Optional: `webhook_id`, `interruption_sensitivity`, `enable_recording`.
 
 ---
 
-## Key fields explained
+## Key fields
 
-### `llm_id` (required)
+### `transcriber`
 
-The ID of an LLM model you created with `POST /v1/models`. The agent loads its personality and instructions from that model.
+| Field | Example |
+| --- | --- |
+| `provider` | Default STT |
+| `model` | Default STT |
+| `language` | `en` |
 
-### `transcriber` (required)
+### `tts`
 
-How the agent **listens**.
+| Field | Example |
+| --- | --- |
+| `provider` | Default voice |
+| `voice_id` | Default voice |
+| `speed` | `1.0` |
+| `stability` | `0.5` |
 
-| Field | Meaning | Example |
-| --- | --- | --- |
-| `provider` | STT company | `deepgram` |
-| `model` | Which model | `nova-3` |
-| `language` | Expected spoken language | `en` |
+### Behavior
 
-### `tts` (required)
-
-How the agent **speaks**.
-
-| Field | Meaning | Example |
-| --- | --- | --- |
-| `provider` | TTS company | `deepgram` |
-| `voice_id` | Which voice | `asteria` |
-| `speed` | Speaking rate | `1.0` = normal |
-| `stability` | Voice consistency | `0.5` |
-
-See [Voices guide](/guides/voices) to list or import other voices.
-
-### Behavior fields
-
-| Field | What it does | Example |
-| --- | --- | --- |
-| `first_message` | First thing said when call connects | `"Hi! How can I help?"` |
-| `end_call_phrases` | User says these → call ends | `["goodbye", "bye"]` |
-| `silence_timeout_seconds` | Hang up after N seconds of silence | `10` |
-| `max_duration_seconds` | Hard cap on call length | `600` (10 min) |
+| Field | Purpose |
+| --- | --- |
+| `first_message` | Opening line |
+| `end_call_phrases` | User triggers hang-up |
+| `silence_timeout_seconds` | End on silence |
+| `max_duration_seconds` | Hard time limit |
+| `interruption_sensitivity` | 0.0–1.0 |
+| `enable_recording` | Record call audio |
 
 ---
 
-## Full create example
+## Full example
 
-See **[Build your first agent](/quickstart/first-agent)** step 4 for a copy-paste example, or [Create agent](/api-reference/agents/create-agent) in the API reference.
+→ **[Quickstart](/guides/quickstart)** step 3 · [Create agent](/api-reference/agents/create-agent)
 
 ---
 
 ## Update an agent
 
-Change voice, greeting, or link a different LLM without recreating:
-
 ```bash
 curl -X PATCH http://13.207.23.185:8000/v1/agents/<agent_id> \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
-  -d '{
-    "first_message": "Hello! Thanks for calling Acme Support."
-  }'
+  -d '{ "first_message": "Hello! Thanks for calling." }'
 ```
 
 ---
 
 ## Next steps
 
-- **[Build your first agent](/quickstart/first-agent)** — create your first agent
-- **[Phone calls](/quickstart/phone-calls)** — use your agent on real numbers
-- **[LLM models](/api-reference/llm-models/create-llm-model)** — change the brain
+- **[Quickstart](/guides/quickstart)**
+- **[Phone calls](/guides/phone-calls)**
+- **[Web calls](/guides/web-calls)**
+- **[Web SDK](/concepts/web-sdk)**

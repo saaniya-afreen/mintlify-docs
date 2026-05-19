@@ -1,0 +1,206 @@
+---
+title: Web SDK
+description: OneInbox Web SDK（@oneinbox/web-sdk）でブラウザ音声を埋め込む。
+---
+
+## Web SDK とは
+
+**Web SDK**（`@oneinbox/web-sdk`）は OneInbox の **フロントエンド**ブラウザ音声ライブラリです。アクティブな [Web 通話](/jp/guides/web-calls) セッションにユーザーのブラウザを接続します。
+
+Web 通話は **作成しません**。先にバックエンドで `POST /v1/calls/web` で Web 通話を作成 — [Web 通話](/jp/guides/web-calls) ガイドを参照。
+
+---
+
+## 必要な値
+
+| 値 | 取得元 |
+| --- | --- |
+| `server_url` | [Web 通話](/jp/guides/web-calls) レスポンス（例: `wss://voice.oneinbox.ai`） |
+| `participant_token` | 同上 — このセッション用の短期トークン |
+
+バックエンドが Web 通話を作成し、これらの値をフロントに返します。Web SDK に OneInbox API キーは不要です。
+
+---
+
+## アーキテクチャ
+
+```
+ユーザーが「AI と話す」をクリック
+        │
+        ▼
+ 自社フロントエンド
+ └── POST /api/start-call  ──►  自社バックエンド
+                                      │
+                            POST /v1/calls/web   ← Web 通話（API）
+                                      │
+                                      ▼
+                               server_url + participant_token
+                                      │
+        ◄─────────────────────────────┘
+        │
+        ▼
+ Web SDK がブラウザで接続
+        │
+        ▼
+ エージェントとのライブ会話
+```
+
+---
+
+## Web SDK が担うもの
+
+- `server_url` と `participant_token` での接続
+- ブラウザのマイクアクセスと音声ストリーミング
+- 通話状態（接続中、アクティブ、終了）
+- UI からの切断 / 通話終了
+
+**担わないもの:**
+
+- エージェントや LLM モデルの作成
+- `POST /v1/calls/web` の呼び出し（バックエンドの役割）
+- API キーの保存または使用
+
+---
+
+<Steps>
+
+<Step title="1. バックエンド — Web 通話トークンの中継">
+
+サーバーが [Web 通話](/jp/guides/web-calls) を作成し、フロントに必要な値のみ返します:
+
+```javascript
+// server.js (Node.js / Express)
+const express = require('express');
+const app = express();
+app.use(express.json());
+
+app.post('/api/start-call', async (req, res) => {
+  try {
+    const response = await fetch('http://13.207.23.185:8000/v1/calls/web', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.ONEINBOX_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        agent_id: process.env.ONEINBOX_AGENT_ID,
+        variables: {
+          customer_name: req.body.customerName || 'Guest'
+        }
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`OneInbox API error: ${response.status}`);
+    }
+
+    const { id: call_id, server_url, participant_token } = await response.json();
+    res.json({ call_id, server_url, participant_token });
+  } catch (error) {
+    console.error('Failed to start call:', error);
+    res.status(500).json({ error: 'Failed to start call' });
+  }
+});
+
+app.listen(3000);
+```
+
+</Step>
+
+<Step title="2. フロントエンド — インストールと接続">
+
+```bash
+npm install @oneinbox/web-sdk
+```
+
+```jsx
+import { useState, useRef } from 'react';
+import { OneinboxCall } from '@oneinbox/web-sdk';
+
+export default function VoiceWidget({ customerName }) {
+  const [status, setStatus] = useState('idle');
+  const callRef = useRef(null);
+
+  async function startCall() {
+    setStatus('connecting');
+    try {
+      const res = await fetch('/api/start-call', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerName })
+      });
+      const { server_url, participant_token } = await res.json();
+
+      const call = new OneinboxCall({
+        serverUrl: server_url,
+        token: participant_token,
+        onStateChange: (state) => setStatus(state),
+        onEnded: () => {
+          setStatus('ended');
+          callRef.current = null;
+        }
+      });
+
+      await call.connect();
+      callRef.current = call;
+      setStatus('active');
+    } catch (error) {
+      console.error('Call failed:', error);
+      setStatus('idle');
+    }
+  }
+
+  async function endCall() {
+    await callRef.current?.disconnect();
+    setStatus('ended');
+  }
+
+  if (status === 'idle') {
+    return <button onClick={startCall}>Talk to AI</button>;
+  }
+  if (status === 'connecting') return <p>Connecting...</p>;
+  if (status === 'active') {
+    return (
+      <div>
+        <span>Connected</span>
+        <button onClick={endCall}>End call</button>
+      </div>
+    );
+  }
+  return <p>Call ended.</p>;
+}
+```
+
+</Step>
+
+</Steps>
+
+---
+
+## 他パスとの比較
+
+| パス | 内容 | 場所 |
+| --- | --- | --- |
+| **Web 通話** | バックエンド API セッション | [Web 通話](/jp/guides/web-calls) ガイド |
+| **Web SDK** | そのセッション用ブラウザクライアント | このページ |
+| **電話通話** | テレフォニーキャリア経由 PSTN | [電話通話](/jp/guides/phone-calls) ガイド |
+
+---
+
+## トラブルシューティング
+
+| 問題 | 対処 |
+| --- | --- |
+| OneInbox から `401` | Web 通話作成時のバックエンド API キーを確認 |
+| Web SDK が接続できない | バックエンドから新しい `server_url` と `participant_token` を取得 |
+| 音声が出ない | ブラウザのマイク許可；本番は HTTPS |
+| フロントに API キー | Web 通話はバックエンドでのみ作成 |
+
+---
+
+## 次のステップ
+
+- **[Web 通話](/jp/guides/web-calls)** — 先に API セッションを作成
+- **[クイックスタート](/jp/guides/quickstart)** — 最初のエージェント + Web 通話
+- **[エージェント](/jp/concepts/agents)** — STT、LLM、TTS の設定
+- **[Web 通話開始](/api-reference/calls/start-web-call)** — API リファレンス

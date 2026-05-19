@@ -1,0 +1,169 @@
+---
+title: ナレッジベース
+description: ドキュメントをインデックスし、通話中に自社コンテンツから回答できるようにする。
+---
+
+## 概要
+
+ナレッジベース（KB）により、エージェントが **自社コンテンツから回答を取得**できます — 製品ドキュメント、FAQ、ポリシー、ファイルなど。
+
+**フロー:** KB 作成 → ソース追加（非同期）→ ジョブをポーリング → LLM モデルに `kb_id` を紐付け → 通話で利用。
+
+---
+
+## エンドポイント一覧
+
+| ステップ | メソッド | エンドポイント |
+| --- | --- | --- |
+| 1 | `POST` | `/v1/knowledge-bases` |
+| 2 | `POST` | `/v1/knowledge-bases/{kb_id}/sources` |
+| 3 | `GET` | `/v1/knowledge-bases/{kb_id}/jobs/{job_id}` |
+| 4 | `PATCH` | `/v1/models/{llm_id}` |
+| — | `GET` | `/v1/knowledge-bases/{kb_id}/sources` |
+| — | `GET` | `/v1/knowledge-bases/{kb_id}/jobs` |
+
+---
+
+## 検索の仕組み
+
+OneInbox は KB の合計トークン予算（デフォルト **1 万トークン**）に応じてモードを選択します:
+
+- **≤ 1 万トークン** — 通話時に LLM システムプロンプトへコンテンツを注入（追加の検索ラウンドトリップなし）
+- **> 1 万トークン** — ベクトル検索。LLM が呼び出す合成ツール `search_knowledge_base` を使用
+
+ソースのアップロードは **`202 Accepted`** を即時返却。`job_id` をポーリングし、ステータスが `completed` になるまで待ちます。
+
+---
+
+<Steps>
+
+<Step title="1. ナレッジベースを作成">
+
+```bash
+curl -X POST http://13.207.23.185:8000/v1/knowledge-bases \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Product Docs",
+    "chunk_size": 512,
+    "multilingual": false
+  }'
+```
+
+
+</Step>
+
+<Step title="2a. ファイルソースを追加">
+
+PDF、DOCX、XLSX、TXT、MD をアップロード（1 ファイル最大 **50 MiB**）。`multipart/form-data` を使用:
+
+```bash
+curl -X POST "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/sources" \
+  -H "Authorization: Bearer <api_key>" \
+  -F "file=@/path/to/document.pdf"
+```
+
+</Step>
+
+<Step title="2b. URL ソースを追加">
+
+```bash
+curl -X POST "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/sources" \
+  -H "Authorization: Bearer <api_key>" \
+  -F "type=url" \
+  -F "source=https://docs.example.com/faq"
+```
+
+</Step>
+
+<Step title="2c. インラインテキストを追加">
+
+```bash
+curl -X POST "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/sources" \
+  -H "Authorization: Bearer <api_key>" \
+  -F "type=text" \
+  -F "source=Our return policy is 30 days, no questions asked."
+```
+
+</Step>
+
+<Step title="3. インデックスジョブをポーリング">
+
+すべてのソースアップロードは **202** とジョブ ID を返します:
+
+<ResponseExample>
+
+```json
+{
+  "job": {
+    "id": "job_abc123",
+    "status": "queued"
+  }
+}
+```
+
+</ResponseExample>
+
+`completed` または `failed` までポーリング:
+
+```bash
+curl "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/jobs/<job_id>" \
+  -H "Authorization: Bearer <api_key>"
+```
+
+ステータス: `queued` → `running` → `completed` | `failed`。成功時、`payload` に `tokens`、`chunks`、`vector_indexed` が含まれます。
+
+最近のジョブ一覧:
+
+```bash
+curl "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/jobs" \
+  -H "Authorization: Bearer <api_key>"
+```
+
+</Step>
+
+<Step title="4. ソース一覧（任意）">
+
+```bash
+curl "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/sources" \
+  -H "Authorization: Bearer <api_key>"
+```
+
+各行に `status`（`processing` / `ready` / `error`）、`file_name`、`token_count`、`chunk_count`、エラー時は `error_message` が含まれます。
+
+</Step>
+
+<Step title="5. LLM モデルに紐付け">
+
+```bash
+curl -X PATCH "http://13.207.23.185:8000/v1/models/<llm_id>" \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{ "knowledge_base_ids": ["<kb_id>"] }'
+```
+
+この `llm_id` を使うエージェントは、次の通話から KB を利用します。
+
+</Step>
+
+</Steps>
+
+---
+
+## ナレッジベースの管理
+
+```bash
+curl http://13.207.23.185:8000/v1/knowledge-bases \
+  -H "Authorization: Bearer <api_key>"
+
+curl -X DELETE "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>" \
+  -H "Authorization: Bearer <api_key>"
+```
+
+---
+
+## 次のステップ
+
+- **[ツール](/jp/guides/tools)** — エージェントのアクション
+- **[KB 作成](/api-reference/knowledge-bases/create-knowledge-base)** — API リファレンス
+- **[ソース追加](/api-reference/knowledge-bases/add-knowledge-base-source)** — API リファレンス

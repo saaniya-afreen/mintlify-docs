@@ -1,25 +1,25 @@
 ---
-title: Webhooks
-description: Receive call events on your server.
+title: Webhook
+description: 通話イベントを自社サーバーで受信する。
 ---
 
-## Before you start
+## 開始前
 
-**You need:** an `api_key` and a public HTTPS URL that accepts POST requests.
+**必要なもの:** `api_key` と POST を受け付ける公開 HTTPS URL。
 
-**Common events:**
+**一般的なイベント:**
 
-| Event | When |
+| イベント | タイミング |
 | --- | --- |
-| `call.started` | Call connects |
-| `call.ended` | Call finishes |
-| `transcript.final` | Full transcript ready |
+| `call.started` | 通話接続 |
+| `call.ended` | 通話終了 |
+| `transcript.final` | 完全なトランスクリプト準備完了 |
 
 ---
 
 <Steps>
 
-<Step title="1. Create a webhook">
+<Step title="1. Webhook を作成">
 
 ```bash
 curl -X POST http://13.207.23.185:8000/v1/webhooks \
@@ -35,27 +35,27 @@ curl -X POST http://13.207.23.185:8000/v1/webhooks \
 
 </Step>
 
-<Step title="2. Test delivery">
+<Step title="2. 配信をテスト">
 
-Send a test payload to your URL:
+URL へテストペイロードを送信:
 
 ```bash
 curl -X POST http://13.207.23.185:8000/v1/webhooks/<webhook_id>/test \
   -H "Authorization: Bearer <api_key>"
 ```
 
-Check your server logs for the incoming request.
+サーバーログで受信リクエストを確認します。
 
 </Step>
 
-<Step title="3. List or update">
+<Step title="3. 一覧・更新">
 
 ```bash
-# List all
+# 一覧
 curl http://13.207.23.185:8000/v1/webhooks \
   -H "Authorization: Bearer <api_key>"
 
-# Update events
+# イベント更新
 curl -X PATCH http://13.207.23.185:8000/v1/webhooks/<webhook_id> \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
@@ -63,7 +63,7 @@ curl -X PATCH http://13.207.23.185:8000/v1/webhooks/<webhook_id> \
     "events": ["call.started", "call.ended"]
   }'
 
-# Delete
+# 削除
 curl -X DELETE http://13.207.23.185:8000/v1/webhooks/<webhook_id> \
   -H "Authorization: Bearer <api_key>"
 ```
@@ -74,6 +74,6 @@ curl -X DELETE http://13.207.23.185:8000/v1/webhooks/<webhook_id> \
 
 ---
 
-## API reference
+## API リファレンス
 
-[Create webhook](/api-reference/webhooks/create-webhook) · [Test webhook](/api-reference/webhooks/test-webhook-delivery) · [List webhooks](/api-reference/webhooks/list-webhooks)
+[Webhook 作成](/api-reference/webhooks/create-webhook) · [Webhook テスト](/api-reference/webhooks/test-webhook-delivery) · [Webhook 一覧](/api-reference/webhooks/list-webhooks)

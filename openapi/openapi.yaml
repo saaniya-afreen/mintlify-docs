@@ -15,7 +15,7 @@ info:
     Authorization: Bearer <api_key>
     ```
 
-    Get your API key from the **OneInbox dashboard** (log in → **API Keys** → **Create API key**). The full key is shown once — copy it immediately. Accounts are created by the OneInbox team during onboarding.
+    Get your API key from the [OneInbox dashboard](https://oneinbox-dashboard.vercel.app) → **API Keys** → **Create API key**.
 
     Integrations are stored at `/v1/credentials` (docs call them **Integrations**).
 
@@ -25,13 +25,13 @@ servers:
 
 tags:
   - name: Integrations
-    description: Store third-party provider API keys (OpenAI, Twilio, etc.)
+    description: Store third-party provider API keys (OpenAI, telephony carriers, etc.)
   - name: LLM Models
     description: Define the brain — model, system prompt, tools
   - name: Agents
     description: Assemble STT + LLM + TTS into a voice agent
   - name: Calls
-    description: Browser test calls and outbound phone calls
+    description: Web calls and outbound phone calls
   - name: Voices
     description: List and import TTS voices
   - name: Tools
@@ -41,7 +41,7 @@ tags:
   - name: Knowledge Bases
     description: RAG documents for your agent
   - name: Phone Numbers
-    description: Search and register Twilio numbers
+    description: Search and register phone numbers via your telephony carrier
   - name: Health
     description: Service health check
 
@@ -64,7 +64,7 @@ components:
           enum: [openai, gemini, elevenlabs, cartesia, deepgram, twilio]
         api_key:
           type: string
-          description: Provider API key. For Twilio, use Auth Token.
+          description: Provider API key or auth token. For telephony carriers, use the credential from your carrier console (e.g. Twilio Auth Token, Tenyx API key).
     IntegrationResponse:
       type: object
       properties:
@@ -88,7 +88,7 @@ components:
           enum: [openai, gemini, anthropic]
         model:
           type: string
-          example: gpt-4o-mini
+          example: gpt-4.1-mini
         system_prompt:
           type: string
         temperature:
@@ -316,14 +316,54 @@ components:
     KnowledgeBaseSourceResponse:
       type: object
       properties:
+        job:
+          type: object
+          properties:
+            id:
+              type: string
+            status:
+              type: string
+              enum: [queued, running, completed, failed]
+    KnowledgeBaseJobResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: [queued, running, completed, failed]
+        error_message:
+          type: string
+        payload:
+          type: object
+          properties:
+            tokens:
+              type: integer
+            chunks:
+              type: integer
+            vector_indexed:
+              type: boolean
+    KnowledgeBaseSourceListItem:
+      type: object
+      properties:
         id:
           type: string
         type:
           type: string
-          enum: [url, text]
-        source:
-          type: string
         status:
+          type: string
+          enum: [processing, ready, error]
+        file_name:
+          type: string
+        mime_type:
+          type: string
+        file_size:
+          type: integer
+        token_count:
+          type: integer
+        chunk_count:
+          type: integer
+        error_message:
           type: string
         created_at:
           type: string
@@ -371,7 +411,7 @@ components:
           type: string
         credential_id:
           type: string
-          description: Twilio integration ID (alternative to inline provider_config)
+          description: Telephony integration ID (alternative to inline provider_config)
         provider_config:
           type: object
           properties:
@@ -680,10 +720,11 @@ paths:
   /v1/calls/web:
     post:
       tags: [Calls]
-      summary: Start browser test call
+      summary: Start web call
       description: |
-        Dev/demo only. Returns a meet URL token — not for embedding in your product.
-        Always call from your backend; never expose `api_key` in frontend code.
+        Create a **web call** session via the API. Returns `call_id`, `server_url`, and `participant_token`.
+
+        Pass `server_url` and `participant_token` to the [Web SDK](/concepts/web-sdk) on your frontend — do not expose `api_key` in browser code.
       operationId: createWebCall
       security:
         - ApiKeyAuth: []
@@ -1127,11 +1168,15 @@ paths:
       summary: Add knowledge base source
       operationId: addKnowledgeBaseSource
       description: |
-        Add content to a knowledge base.
+        Add content to a knowledge base. Returns **202 Accepted** with a `job.id` — poll `GET .../jobs/{job_id}` until complete.
 
-        **URL (`type: url`):** OneInbox fetches the page, splits it into chunks, and creates embeddings. Use public HTTPS URLs.
+        **File upload:** send `multipart/form-data` with a `file` field. Allowed: pdf, docx, xlsx, xls, txt, md (max 50 MiB).
 
-        **Text (`type: text`):** Paste raw text directly — policies, FAQs, scripts — without hosting a page.
+        **URL:** `type=url` and `source=<https URL>` as form fields.
+
+        **Text:** `type=text` and `source=<plain text>` as form fields.
+
+        **Mode-switch:** total KB tokens ≤ 10k → stuffed into system prompt; > 10k → vector retrieval with synthetic search tool.
       security:
         - ApiKeyAuth: []
       parameters:
@@ -1143,25 +1188,72 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/KnowledgeBaseSourceRequest'
-            examples:
-              url:
-                value:
-                  type: url
-                  source: https://docs.example.com/faq
-              text:
-                value:
-                  type: text
-                  source: Our return policy is 30 days.
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: PDF, DOCX, XLSX, TXT, or MD file
+                type:
+                  type: string
+                  enum: [url, text]
+                source:
+                  type: string
+                  description: URL or inline text when type is set
       responses:
-        '201':
-          description: Created
+        '202':
+          description: Accepted — indexing job queued
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseSourceResponse'
+
+  /v1/knowledge-bases/{kb_id}/jobs:
+    get:
+      tags: [Knowledge Bases]
+      summary: List knowledge base jobs
+      operationId: listKnowledgeBaseJobs
+      description: Most recent jobs first, up to 20.
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: kb_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+
+  /v1/knowledge-bases/{kb_id}/jobs/{job_id}:
+    get:
+      tags: [Knowledge Bases]
+      summary: Get knowledge base job
+      operationId: getKnowledgeBaseJob
+      description: Poll indexing job status. On completion, payload includes tokens, chunks, and vector_indexed.
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: kb_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseJobResponse'
 
   /v1/phone-numbers/search:
     get:
@@ -1182,7 +1274,7 @@ paths:
           required: true
           schema:
             type: string
-          description: Twilio integration ID
+          description: Telephony integration ID from POST /v1/credentials
         - name: limit
           in: query
           schema:

@@ -1,0 +1,68 @@
+---
+title: ボイス
+description: 組み込みボイスを一覧するか、サードパーティプロバイダからカスタムボイスをインポートする。
+---
+
+## 開始前
+
+**組み込みボイス**はそのまま利用可能 — [エージェント作成](/jp/guides/quickstart) の `tts.voice_id` で指定します。
+
+**カスタムボイス**は先にサードパーティプロバイダのインテグレーション（例: ElevenLabs、Cartesia）が必要です。
+
+---
+
+<Steps>
+
+<Step title="1. 利用可能なボイスを一覧">
+
+```bash
+# すべて
+curl http://13.207.23.185:8000/v1/voices \
+  -H "Authorization: Bearer <api_key>"
+
+# プロバイダでフィルタ
+curl "http://13.207.23.185:8000/v1/voices?provider=cartesia" \
+  -H "Authorization: Bearer <api_key>"
+```
+
+`voice_id` を選び、エージェントの `tts` ブロックで使用します。
+
+</Step>
+
+<Step title="2. カスタムボイスをインポート（任意）">
+
+**目的:** サードパーティプロバイダ（例: ElevenLabs、Cartesia）からボイスをクローン・インポート。
+
+先に [インテグレーション](/jp/concepts/integrations) を追加してから:
+
+```bash
+curl -X POST http://13.207.23.185:8000/v1/voices/import \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "provider": "elevenlabs",
+    "provider_voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "name": "Rachel (cloned)",
+    "credential_id": "<credential_id>",
+    "gender": "female",
+    "language": "en",
+    "accent": "American"
+  }'
+```
+
+
+</Step>
+
+<Step title="3. 1 回の通話だけボイスを上書き（任意）">
+
+Web 通話作成時、エージェントを変更せず TTS を上書きできます — [Web 通話開始](/api-reference/calls/start-web-call) の `overrides` フィールド（サードパーティプロバイダ例: ElevenLabs、Cartesia）を参照。
+
+</Step>
+
+</Steps>
+
+---
+
+## API リファレンス
+
+[ボイス一覧](/api-reference/voices/list-voices) · [ボイスインポート](/api-reference/voices/import-voice)
