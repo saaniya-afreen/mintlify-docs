@@ -13,6 +13,15 @@ You configure the agent with a few API calls. OneInbox handles audio streaming a
   Step-by-step walkthrough: API key → OpenAI → LLM → agent → browser test call.
 </Card>
 
+<CardGroup cols={2}>
+  <Card title="Download Postman collection" icon="download" href="/oneinbox.postman_collection.json">
+    All endpoints pre-configured — import into Postman and run in order. Variables auto-save as you go.
+  </Card>
+  <Card title="API reference" icon="code" href="/api-reference/auth/sign-up">
+    Try every endpoint in the browser — same requests as the collection.
+  </Card>
+</CardGroup>
+
 ---
 
 ## What you'll build (end result)
@@ -129,13 +138,19 @@ You choose the providers (e.g. Deepgram for voice, OpenAI for brain). OneInbox c
 
 This guide shows **curl** commands (paste into Terminal on Mac, or Command Prompt / WSL on Windows).
 
-Prefer a visual tool? Import our Postman collection and run the same requests in order:
+Prefer a visual tool? Use our Postman collection:
 
-1. Download `oneinbox.postman_collection.json` from the repo
-2. Import into [Postman](https://www.postman.com/)
+<Card title="Download Postman collection" icon="download" href="/oneinbox.postman_collection.json">
+  **OneInbox API v1** — Auth, API Keys, Integrations, LLM Models, Agents, Calls, and more.
+</Card>
+
+**Import steps:**
+
+1. [Download the collection](/oneinbox.postman_collection.json) (or click the card above)
+2. Open [Postman](https://www.postman.com/) → **Import** → upload the file
 3. Run folders in order: **Auth → API Keys → Integrations → LLM Models → Agents → Calls**
 
-Variables like `{{api_key}}` and `{{agent_id}}` auto-fill when you use Postman's test scripts.
+Variables like `{{api_key}}`, `{{llm_id}}`, and `{{agent_id}}` auto-fill from Postman's test scripts after each request.
 
 ---
 
