@@ -14,11 +14,7 @@ Follow each step in order. At the end you'll talk to your voice agent in the bro
 | Item | Where to get it | Used in |
 | --- | --- | --- |
 | **OpenAI API key** | [platform.openai.com](https://platform.openai.com) → API keys → Create | Step 2 |
-| **Terminal or Postman** | Mac: Terminal app. Windows: PowerShell or [Postman](https://www.postman.com/) | Every step |
-
-<Card title="Download Postman collection" icon="download" href="/oneinbox.postman_collection.json">
-  Prefer Postman over curl? Import this file — same steps as below, with auto-saved variables.
-</Card>
+| **Terminal** | Mac: Terminal app. Windows: PowerShell or WSL | Every step |
 | **Your email** | Any work or personal email | Step 1 sign-up |
 
 You do **not** need: Twilio, a phone number, ElevenLabs, or a credit card on OneInbox for this guide.
@@ -526,7 +522,7 @@ If `status` is `"completed"` and you see a `transcript` array — **you're done.
     Check your OpenAI account has billing enabled and the key in step 2 is valid. Test the key at platform.openai.com.
   </Accordion>
   <Accordion title="curl: command not found">
-    Install curl or use [Postman](https://www.postman.com/) instead. Import our collection and run requests in the same order.
+    Install [curl](https://curl.se/) or use the **Try It** buttons in the [API reference](/api-reference/auth/sign-up) instead.
   </Accordion>
   <Accordion title="JSON parse error from curl">
     Make sure quotes in `-d '{ ... }'` are straight quotes, not curly “smart quotes” from Word or Notes.
