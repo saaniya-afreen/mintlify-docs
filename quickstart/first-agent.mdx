@@ -1,6 +1,6 @@
 ---
 title: Build your first agent
-description: Step-by-step guide from sign-up to your first browser test call.
+description: Step-by-step guide from API key to your first browser test call.
 ---
 
 Follow each step in order. At the end you'll talk to your voice agent in the browser.
@@ -13,11 +13,15 @@ Follow each step in order. At the end you'll talk to your voice agent in the bro
 
 | Item | Where to get it | Used in |
 | --- | --- | --- |
+| **OneInbox API key** | OneInbox dashboard → **API Keys** → **Create API key** | Every step |
 | **OpenAI API key** | [platform.openai.com](https://platform.openai.com) → API keys → Create | Step 2 |
 | **Terminal** | Mac: Terminal app. Windows: PowerShell or WSL | Every step |
-| **Your email** | Any work or personal email | Step 1 sign-up |
 
 You do **not** need: Twilio, a phone number, ElevenLabs, or a credit card on OneInbox for this guide.
+
+<Info>
+Dashboard URL is provided during onboarding. Log in there to create and manage API keys.
+</Info>
 
 <Tip>
 **How to get an OpenAI key:** Log into OpenAI → click your profile → **API keys** → **Create new secret key** → copy it (starts with `sk-`). You won't see it again.
@@ -31,8 +35,7 @@ Every command has **placeholders** in angle brackets. Replace them with your rea
 
 | Placeholder | Replace with |
 | --- | --- |
-| `<access_token>` | JWT from sign-up (step 1a) |
-| `<api_key>` | Your OneInbox key (step 1b) — starts with `oi_live_` |
+| `<api_key>` | Your OneInbox key from the dashboard — starts with `oi_live_` |
 | `<your_openai_api_key>` | Your OpenAI key — starts with `sk-` |
 | `<llm_id>` | ID from step 3 |
 | `<agent_id>` | ID from step 4 |
@@ -41,7 +44,6 @@ Every command has **placeholders** in angle brackets. Replace them with your rea
 **Keep a notepad** (or use this template) and fill in values as you go:
 
 ```
-access_token: 
 api_key: 
 llm_id: 
 agent_id: 
@@ -51,119 +53,29 @@ meet_url:
 
 ---
 
-## Two tokens — the #1 mistake new users make
-
-OneInbox gives you **two different tokens**. They are not interchangeable.
-
-| Token | Looks like | When you get it | Use it for |
-| --- | --- | --- | --- |
-| `access_token` (JWT) | Long string starting with `eyJ...` | Sign-up or login | **Only** creating your API key |
-| `api_key` | Starts with `oi_live_...` | After creating API key | **Everything** from step 2 onward |
-
-<Warning>
-If step 2 or later returns **`401 Unauthorized`**, you are almost certainly using the JWT instead of `api_key`. Go back to step 1b and copy `api_key` again.
-</Warning>
-
-More detail → [Authentication](/concepts/authentication)
-
----
-
 <Steps>
 
-<Step title="1. Create your OneInbox account and API key">
+<Step title="1. Get your OneInbox API key">
 
 ### What you're doing
 
-You're creating a OneInbox account, then generating an **API key** — your permanent credential for all future requests.
+You're copying your **API key** — the credential used in every curl command in this guide.
 
-### Why two requests?
+### How
 
-- **Sign-up** creates your user and gives a temporary login token (JWT)
-- **Create API key** turns that into the long-lived `api_key` you'll use everywhere else
-
----
-
-### Step 1a — Sign up
-
-**Replace** the email, password, name, and company with your details.
-
-```bash
-curl -X POST http://13.207.23.185:8000/v1/auth/signup \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "you@yourcompany.com",
-    "password": "your-secure-password",
-    "name": "Your Name",
-    "organization_name": "Your Company"
-  }'
-```
-
-**What success looks like** (HTTP `201`):
-
-<ResponseExample>
-
-```json
-{
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "token_type": "bearer",
-  "user": {
-    "id": "user_abc123",
-    "email": "you@yourcompany.com",
-    "name": "Your Name"
-  }
-}
-```
-
-</ResponseExample>
-
-<Check>
-**Copy and save:** `access_token` — you'll paste it into step 1b **once**, then never use it again for resource calls.
-</Check>
-
-**Already have an account?** Use [Log in](/api-reference/auth/log-in) instead of sign-up. You'll get the same `access_token` shape.
-
-**Common errors:**
-
-| Error | Meaning | Fix |
-| --- | --- | --- |
-| `409` / email exists | Account already created | Use login instead |
-| `422` | Missing or invalid field | Check email format and password length |
-
----
-
-### Step 1b — Create your API key
-
-**Replace** `<access_token>` with the value from step 1a.
-
-```bash
-curl -X POST http://13.207.23.185:8000/v1/api-keys \
-  -H "Authorization: Bearer <access_token>" \
-  -H "Content-Type: application/json" \
-  -d '{ "name": "My First Key" }'
-```
-
-**What success looks like** (HTTP `201`):
-
-<ResponseExample>
-
-```json
-{
-  "id": "key_abc123",
-  "name": "My First Key",
-  "api_key": "oi_live_xxxxxxxxxxxxxxxxxxxx",
-  "created_at": "2026-01-15T10:00:00Z"
-}
-```
-
-</ResponseExample>
+1. Log in to the **OneInbox dashboard** (URL from your onboarding email)
+2. Go to **API Keys**
+3. Click **Create API key**, enter a name (e.g. "My First Key"), and copy the key
 
 <Warning>
-**Copy `api_key` now.** OneInbox shows it **only once**. If you lose it, create a new key with the same curl (using a fresh JWT from login).
+**Copy the key now.** OneInbox shows the full value **only once**. If you lose it, create a new key in the dashboard and revoke the old one.
 </Warning>
 
 <Check>
-**Save:** `api_key` → use `Authorization: Bearer <api_key>` in **every step from here on**.
+**Save:** `api_key` (starts with `oi_live_...`) → use `Authorization: Bearer <api_key>` in **every step from here on**.
 </Check>
+
+More detail → [Authentication](/concepts/authentication)
 
 </Step>
 
@@ -223,7 +135,7 @@ Notice there is **no** OpenAI key in the response — that's intentional.
 
 | Error | Meaning | Fix |
 | --- | --- | --- |
-| `401` | Wrong auth token | Use `api_key`, not JWT |
+| `401` | Missing or wrong API key | Use full `oi_live_...` key from dashboard |
 | `400` | Invalid provider or key | Check `"provider": "openai"` and your `sk-` key |
 
 </Step>
@@ -515,14 +427,14 @@ If `status` is `"completed"` and you see a `transcript` array — **you're done.
 ## Troubleshooting
 
 <AccordionGroup>
-  <Accordion title="401 Unauthorized on any step after step 1">
-    You're using the JWT (`eyJ...`) instead of your API key (`oi_live_...`). Create a new API key if you lost it: log in → `POST /v1/api-keys` with the JWT.
+  <Accordion title="401 Unauthorized on any step">
+    Missing or wrong API key. Use `Authorization: Bearer <api_key>` with your full `oi_live_...` key from the dashboard. Create a new key if you lost it.
   </Accordion>
   <Accordion title="OpenAI errors during the call">
     Check your OpenAI account has billing enabled and the key in step 2 is valid. Test the key at platform.openai.com.
   </Accordion>
   <Accordion title="curl: command not found">
-    Install [curl](https://curl.se/) or use the **Try It** buttons in the [API reference](/api-reference/auth/sign-up) instead.
+    Install [curl](https://curl.se/) or use the **Try It** buttons in the [API reference](/api-reference/integrations/create-integration) instead.
   </Accordion>
   <Accordion title="JSON parse error from curl">
     Make sure quotes in `-d '{ ... }'` are straight quotes, not curly “smart quotes” from Word or Notes.

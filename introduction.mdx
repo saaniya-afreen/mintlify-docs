@@ -13,7 +13,7 @@ You configure the agent with a few API calls. OneInbox handles audio streaming a
   Step-by-step walkthrough: API key → OpenAI → LLM → agent → browser test call.
 </Card>
 
-<Card title="API reference" icon="code" href="/api-reference/auth/sign-up">
+<Card title="API reference" icon="code" href="/api-reference/integrations/create-integration">
   Try every endpoint in the browser with interactive examples.
 </Card>
 
@@ -23,7 +23,7 @@ You configure the agent with a few API calls. OneInbox handles audio streaming a
 
 By the end of the quickstart you will have:
 
-- A OneInbox account
+- An API key from the OneInbox dashboard
 - An agent named something like **Alex** that talks in English
 - A **browser test call** where you speak to Alex through your microphone
 
@@ -38,8 +38,7 @@ If you've never built with APIs before, these words appear everywhere:
 | Term | Plain English |
 | --- | --- |
 | **API** | A way for your code (or terminal) to talk to OneInbox over the internet |
-| **API key** | Your permanent password for OneInbox. Starts with `oi_live_...`. Use it in every request after step 1 |
-| **JWT / access_token** | A temporary login token. You only use it once — to create your API key |
+| **API key** | Your password for OneInbox API calls. Starts with `oi_live_...`. Create it in the dashboard → **API Keys** |
 | **Integration** | Your OpenAI (or Twilio) key stored safely inside OneInbox. API path: `/v1/credentials` |
 | **LLM model** | The "brain" — which GPT model to use and what instructions it follows (system prompt) |
 | **Agent** | The full voice caller: ears (STT) + brain (LLM) + voice (TTS) + behavior (greeting, timeouts) |
@@ -59,7 +58,7 @@ Think of it like assembling LEGO blocks. Each step creates one block. Later step
 
 | Step | You create | Why | Save this ID |
 | --- | --- | --- | --- |
-| **1** | Account + API key | Proves requests are from you | `api_key` |
+| **1** | API key | Proves requests are from you | `api_key` (from dashboard) |
 | **2** | OpenAI integration | So OneInbox can call OpenAI on your behalf | `credential_id` (optional in basic flow) |
 | **3** | LLM model | Defines personality and which GPT model to use | `llm_id` |
 | **4** | Agent | Wires listening + brain + speaking together | `agent_id` |
@@ -73,7 +72,7 @@ flowchart LR
   D --> E[5. Call]
 ```
 
-**Rule:** After step 1, every request uses `Authorization: Bearer <api_key>`. The JWT from signup is **not** used again.
+**Rule:** Every API request uses `Authorization: Bearer <api_key>`.
 
 ---
 
@@ -103,9 +102,9 @@ You choose the providers (e.g. Deepgram for voice, OpenAI for brain). OneInbox c
     Real outbound/inbound calls — do the first guide first
   </Card>
   <Card title="Authentication explained" icon="key" href="/concepts/authentication">
-    Why there are two tokens and how to avoid 401 errors
+    How to get and use your API key
   </Card>
-  <Card title="API reference" icon="code" href="/api-reference/auth/sign-up">
+  <Card title="API reference" icon="code" href="/api-reference/integrations/create-integration">
     Every endpoint with Try It — test requests in the browser
   </Card>
 </CardGroup>
@@ -133,8 +132,7 @@ You choose the providers (e.g. Deepgram for voice, OpenAI for brain). OneInbox c
 
 | Resource | Guide | When you need it |
 | --- | --- | --- |
-| Auth | [Sign up](/api-reference/auth/sign-up) | Once — create account |
-| API Keys | [Create key](/api-reference/api-keys/create-api-key) | Once — get `api_key` |
+| API key | [Authentication](/concepts/authentication) · Dashboard → **API Keys** | Once — before any API call |
 | Integrations | [Concepts](/concepts/integrations) | Store OpenAI, Twilio keys |
 | LLM Models | [Quickstart step 3](/quickstart/first-agent) | Every agent |
 | Agents | [Quickstart step 4](/quickstart/first-agent) | Every agent |

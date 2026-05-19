@@ -1,11 +1,36 @@
 ---
 title: 認証
-description: JWT と API キーの使い分け。
+description: OneInbox API キーでリクエストを認証する方法。
 ---
 
-| トークン | 用途 |
-| --- | --- |
-| JWT (`access_token`) | API キーの作成・削除のみ |
-| API キー (`api_key`) | エージェント、通話、インテグレーションなど全リソース |
+OneInbox API のすべてのリクエストには **API キー**（`oi_live_...`）が必要です。
 
-**よくある間違い:** リソース API に JWT を使うこと。
+---
+
+## API キーの取得
+
+1. **OneInbox ダッシュボード**にログイン（オンボーディング時に URL を共有）
+2. **API Keys** を開く
+3. **Create API key** をクリックし、名前を付けてキーをコピー
+
+<Warning>
+完全な API キーは**一度だけ**表示されます。安全な場所に保存してください。紛失した場合はダッシュボードで新しいキーを作成し、古いキーを失効させてください。
+</Warning>
+
+アカウントは OneInbox チームがオンボーディング時に作成します。
+
+---
+
+## リクエストヘッダー
+
+```
+Authorization: Bearer <api_key>
+```
+
+---
+
+## よくある間違い
+
+**401 Unauthorized** → `api_key` が欠けている、または間違っています。`oi_live_` で始まる完全なキーを `Authorization: Bearer` に付けてください。
+
+→ **[最初のエージェントを作る](/jp/quickstart/first-agent)**

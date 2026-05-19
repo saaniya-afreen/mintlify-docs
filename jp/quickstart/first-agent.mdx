@@ -9,7 +9,7 @@ description: APIキー作成、OpenAI接続、ブラウザ通話まで約5分。
 
 **内容:**
 
-- OneInbox アカウントと API キーの作成
+- OneInbox ダッシュボードで **API キー**を取得
 - OpenAI **インテグレーション**の追加
 - **LLM モデル**（頭脳）の定義
 - **エージェント**（STT + LLM + TTS）の組み立て
@@ -21,49 +21,25 @@ description: APIキー作成、OpenAI接続、ブラウザ通話まで約5分。
 
 ## 前提条件
 
+- OneInbox **API キー**（ダッシュボード → **API Keys** → **Create API key**）
 - [OpenAI API キー](https://platform.openai.com)
 - ターミナル（`curl`）
+
+<Info>
+ダッシュボード URL はオンボーディング時に共有されます。
+</Info>
 
 Twilio や ElevenLabs は**不要**です。
 
 ---
 
-## 2種類のトークン
-
-| トークン | 取得方法 | 用途 |
-| --- | --- | --- |
-| `access_token` (JWT) | サインアップ | API キー作成**のみ** |
-| `api_key` | ステップ1後 | **それ以外すべて** |
-
-ステップ1以降は `api_key` のみ使用してください。
-
----
-
 <Steps>
 
-<Step title="1. API キーを作成">
+<Step title="1. API キーを取得">
 
-**サインアップ:**
-
-```bash
-curl -X POST http://13.207.23.185:8000/v1/auth/signup \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "you@yourcompany.com",
-    "password": "your-secure-password",
-    "name": "Your Name",
-    "organization_name": "Your Company"
-  }'
-```
-
-**API キー作成** (`access_token` を使用):
-
-```bash
-curl -X POST http://13.207.23.185:8000/v1/api-keys \
-  -H "Authorization: Bearer <access_token>" \
-  -H "Content-Type: application/json" \
-  -d '{ "name": "My First Key" }'
-```
+1. **OneInbox ダッシュボード**にログイン
+2. **API Keys** を開く
+3. **Create API key** をクリックし、キーをコピー
 
 <Warning>
 `api_key` は一度だけ表示されます。以降は `Authorization: Bearer <api_key>` を使用。

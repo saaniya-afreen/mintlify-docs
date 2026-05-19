@@ -9,11 +9,13 @@ info:
 
     ## Authentication
 
-    | Endpoints | Header |
-    | --- | --- |
-    | `POST /v1/auth/*` | None |
-    | `/v1/api-keys` | `Authorization: Bearer <jwt_token>` |
-    | All other endpoints | `Authorization: Bearer <api_key>` |
+    All endpoints require:
+
+    ```
+    Authorization: Bearer <api_key>
+    ```
+
+    Get your API key from the **OneInbox dashboard** (log in → **API Keys** → **Create API key**). The full key is shown once — copy it immediately. Accounts are created by the OneInbox team during onboarding.
 
     Integrations are stored at `/v1/credentials` (docs call them **Integrations**).
 
@@ -22,10 +24,6 @@ servers:
     description: API server
 
 tags:
-  - name: Auth
-    description: Sign up, login, and session management
-  - name: API Keys
-    description: Create and revoke API keys (requires JWT)
   - name: Integrations
     description: Store third-party provider API keys (OpenAI, Twilio, etc.)
   - name: LLM Models
@@ -52,59 +50,9 @@ components:
     ApiKeyAuth:
       type: http
       scheme: bearer
-      description: API key from `POST /v1/api-keys`
-    JwtAuth:
-      type: http
-      scheme: bearer
-      description: JWT from signup or login
+      description: API key from the OneInbox dashboard (API Keys → Create)
 
   schemas:
-    SignupRequest:
-      type: object
-      required: [email, password, name]
-      properties:
-        email:
-          type: string
-          format: email
-        password:
-          type: string
-          minLength: 8
-        name:
-          type: string
-        organization_name:
-          type: string
-    LoginRequest:
-      type: object
-      required: [email, password]
-      properties:
-        email:
-          type: string
-        password:
-          type: string
-    TokenResponse:
-      type: object
-      properties:
-        access_token:
-          type: string
-    CreateApiKeyRequest:
-      type: object
-      required: [name]
-      properties:
-        name:
-          type: string
-    ApiKeyResponse:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        api_key:
-          type: string
-          description: Shown only once on create
-        created_at:
-          type: string
-          format: date-time
     CreateIntegrationRequest:
       type: object
       required: [name, provider, api_key]
@@ -488,120 +436,6 @@ components:
           type: string
 
 paths:
-  /v1/auth/signup:
-    post:
-      tags: [Auth]
-      summary: Sign up
-      description: Create a new account and receive a JWT token.
-      operationId: signup
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SignupRequest'
-            example:
-              email: dev@acme.com
-              password: your-secure-password
-              name: Alex Developer
-              organization_name: Acme Inc
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TokenResponse'
-
-  /v1/auth/login:
-    post:
-      tags: [Auth]
-      summary: Log in
-      operationId: login
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LoginRequest'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TokenResponse'
-
-  /v1/auth/me:
-    get:
-      tags: [Auth]
-      summary: Get current user
-      operationId: getCurrentUser
-      security:
-        - JwtAuth: []
-      responses:
-        '200':
-          description: OK
-
-  /v1/auth/logout:
-    post:
-      tags: [Auth]
-      summary: Log out
-      operationId: logout
-      security:
-        - JwtAuth: []
-      responses:
-        '200':
-          description: OK
-
-  /v1/api-keys:
-    post:
-      tags: [API Keys]
-      summary: Create API key
-      description: Returns `api_key` once. Use it for all resource endpoints.
-      operationId: createApiKey
-      security:
-        - JwtAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateApiKeyRequest'
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiKeyResponse'
-    get:
-      tags: [API Keys]
-      summary: List API keys
-      operationId: listApiKeys
-      security:
-        - JwtAuth: []
-      responses:
-        '200':
-          description: OK
-
-  /v1/api-keys/{key_id}:
-    delete:
-      tags: [API Keys]
-      summary: Revoke API key
-      operationId: revokeApiKey
-      security:
-        - JwtAuth: []
-      parameters:
-        - name: key_id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: No content
-
   /v1/credentials:
     post:
       tags: [Integrations]

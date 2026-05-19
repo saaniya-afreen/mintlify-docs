@@ -7,7 +7,7 @@ description: Every API resource and the order to create them.
 
 | # | Resource | Endpoint | Save |
 | --- | --- | --- | --- |
-| 1 | API key | `POST /v1/auth/signup` → `POST /v1/api-keys` | `api_key` |
+| 1 | API key | OneInbox dashboard → **API Keys** | `api_key` |
 | 2 | Integration | `POST /v1/credentials` | `credential_id` |
 | 3 | LLM model | `POST /v1/models` | `llm_id` |
 | 4 | Agent | `POST /v1/agents` | `agent_id` |
@@ -56,8 +56,7 @@ Integration IDs appear as `credential_id` in some fields. Same thing.
 
 | Resource | Guide | When |
 | --- | --- | --- |
-| Auth | [Sign up](/api-reference/auth/sign-up) | Once |
-| API Keys | [Create key](/api-reference/api-keys/create-api-key) | Once |
+| API key | [Authentication](/concepts/authentication) · Dashboard | Once |
 | Integrations | [Integrations](/concepts/integrations) | OpenAI, Twilio, ElevenLabs, … |
 | LLM Models | [Quickstart step 3](/quickstart/first-agent) | Every agent |
 | Agents | [Quickstart step 4](/quickstart/first-agent) | Every agent |

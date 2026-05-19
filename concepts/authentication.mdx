@@ -1,116 +1,62 @@
 ---
 title: Authentication
-description: Which token to use and when.
+description: How to authenticate API requests with your OneInbox API key.
 ---
 
-If you only read one concept page, read this one. **Wrong token = 401 errors** on almost every step after sign-up.
-
----
-
-## The two tokens
-
-When you sign up, OneInbox gives you a **JWT** (`access_token`). When you create an API key, you get an **`api_key`**. They look different and do different jobs.
-
-| | JWT (`access_token`) | API key (`api_key`) |
-| --- | --- | --- |
-| **Looks like** | Long string starting with `eyJ...` | Starts with `oi_live_...` |
-| **How long it lasts** | Session / expires | Until you revoke it |
-| **Use for** | Sign-up, login, **create/revoke API keys only** | **Everything else** |
-| **Get it from** | `POST /v1/auth/signup` or `/login` | `POST /v1/api-keys` |
-
-```mermaid
-flowchart LR
-  Signup[Sign up or log in] --> JWT[JWT access_token]
-  JWT -->|use once| CreateKey[POST /v1/api-keys]
-  CreateKey --> APIKey[api_key oi_live_...]
-  APIKey --> All[Integrations · Models · Agents · Calls · …]
-```
+Every OneInbox API request uses one credential: your **API key** (`oi_live_...`).
 
 ---
 
-## Which header to send
+## Get your API key
 
-Every authenticated request uses:
+1. Log in to the **OneInbox dashboard** (URL provided during onboarding)
+2. Open **API Keys**
+3. Click **Create API key**, give it a name, and copy the key
+
+<Warning>
+The full API key is shown **only once**. Store it somewhere safe (password manager, secrets vault). If you lose it, create a new key and revoke the old one from the dashboard.
+</Warning>
+
+Accounts are created by the OneInbox team during onboarding — there is no self-service sign-up in the API docs.
+
+---
+
+## How to send it
+
+Add this header to every request:
 
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <api_key>
 ```
 
-But **which token** depends on the endpoint:
-
-| Endpoint | Token to use |
-| --- | --- |
-| `POST /v1/auth/signup` | None |
-| `POST /v1/auth/login` | None |
-| `POST /v1/api-keys` | JWT |
-| `DELETE /v1/api-keys/{id}` | JWT |
-| **All other `/v1/*` endpoints** | **API key** |
-
----
-
-## Step-by-step (first time)
-
-**1. Sign up** — no auth header:
+Example:
 
 ```bash
-curl -X POST http://13.207.23.185:8000/v1/auth/signup \
-  -H "Content-Type: application/json" \
-  -d '{"email":"you@co.com","password":"...","name":"You","organization_name":"Co"}'
-```
-
-Copy `access_token`.
-
-**2. Create API key** — use JWT:
-
-```bash
-curl -X POST http://13.207.23.185:8000/v1/api-keys \
-  -H "Authorization: Bearer <access_token>" \
-  -H "Content-Type: application/json" \
-  -d '{"name":"My Key"}'
-```
-
-Copy `api_key` immediately — shown once.
-
-**3. Everything else** — use API key:
-
-```bash
-curl -X POST http://13.207.23.185:8000/v1/agents \
-  -H "Authorization: Bearer <api_key>" \
-  ...
+curl http://13.207.23.185:8000/v1/agents \
+  -H "Authorization: Bearer <api_key>"
 ```
 
 ---
 
 ## Common mistakes
 
-### Using JWT after step 2
+### Missing or wrong API key
 
-**Symptom:** `401 Unauthorized` when creating integrations, agents, or calls.
+**Symptom:** `401 Unauthorized` on any endpoint.
 
-**Fix:** Use `api_key` (`oi_live_...`), not `access_token` (`eyJ...`).
+**Fix:** Check you copied the full key (starts with `oi_live_`) and used `Authorization: Bearer <api_key>`.
 
 ### Lost your API key
 
-You cannot retrieve it again. Either:
-
-1. Log in → get a new JWT → create a new API key, or
-2. Revoke the old key and create a fresh one
-
-### No auth header at all
-
-**Symptom:** `401` on protected endpoints.
-
-**Fix:** Add `-H "Authorization: Bearer <api_key>"` to every request except sign-up and login.
+You cannot retrieve it again. Log in to the dashboard → **API Keys** → create a new key and revoke the old one if needed.
 
 ---
 
 ## Quick reference
 
-| Action | Auth |
+| Action | Where |
 | --- | --- |
-| Sign up | None → [Sign up](/api-reference/auth/sign-up) |
-| Log in | None → [Log in](/api-reference/auth/log-in) |
-| Create API key | JWT → [Create API key](/api-reference/api-keys/create-api-key) |
-| Create agent, call, etc. | API key |
+| Create or revoke API keys | OneInbox dashboard → **API Keys** |
+| Call agents, models, calls, etc. | `Authorization: Bearer <api_key>` on every request |
 
 Full walkthrough → **[Build your first agent](/quickstart/first-agent)**
