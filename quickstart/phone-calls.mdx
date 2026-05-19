@@ -65,7 +65,7 @@ OneInbox uses **your** Twilio account to buy numbers and place calls. You pay Tw
 - `<your_twilio_auth_token>` → Twilio Auth Token (not Account SID)
 
 ```bash
-curl -X POST https://api.oneinbox.ai/v1/credentials \
+curl -X POST http://13.207.23.185:8000/v1/credentials \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -110,7 +110,7 @@ Asking Twilio (through OneInbox) which phone numbers you can register in a count
 **Replace** `<twilio_integration_id>` and `<api_key>`.
 
 ```bash
-curl "https://api.oneinbox.ai/v1/phone-numbers/search?country=US&limit=10&credential_id=<twilio_integration_id>" \
+curl "http://13.207.23.185:8000/v1/phone-numbers/search?country=US&limit=10&credential_id=<twilio_integration_id>" \
   -H "Authorization: Bearer <api_key>"
 ```
 
@@ -142,7 +142,7 @@ Telling OneInbox: "When someone calls **this number**, connect them to **this ag
 **Replace** all placeholders with your values.
 
 ```bash
-curl -X POST https://api.oneinbox.ai/v1/phone-numbers \
+curl -X POST http://13.207.23.185:8000/v1/phone-numbers \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -176,7 +176,7 @@ Your agent **dials** a phone number and starts a conversation — like a sales o
 **Replace** `<agent_id>`, `<api_key>`, and the target `phone_number` (must include country code, e.g. `+1...`).
 
 ```bash
-curl -X POST https://api.oneinbox.ai/v1/calls \
+curl -X POST http://13.207.23.185:8000/v1/calls \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -218,7 +218,7 @@ curl -X POST https://api.oneinbox.ai/v1/calls \
 ## Verify an outbound call
 
 ```bash
-curl https://api.oneinbox.ai/v1/calls/<call_id> \
+curl http://13.207.23.185:8000/v1/calls/<call_id> \
   -H "Authorization: Bearer <api_key>"
 ```
 

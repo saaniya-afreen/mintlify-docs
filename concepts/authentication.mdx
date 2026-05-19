@@ -53,7 +53,7 @@ But **which token** depends on the endpoint:
 **1. Sign up** — no auth header:
 
 ```bash
-curl -X POST https://api.oneinbox.ai/v1/auth/signup \
+curl -X POST http://13.207.23.185:8000/v1/auth/signup \
   -H "Content-Type: application/json" \
   -d '{"email":"you@co.com","password":"...","name":"You","organization_name":"Co"}'
 ```
@@ -63,7 +63,7 @@ Copy `access_token`.
 **2. Create API key** — use JWT:
 
 ```bash
-curl -X POST https://api.oneinbox.ai/v1/api-keys \
+curl -X POST http://13.207.23.185:8000/v1/api-keys \
   -H "Authorization: Bearer <access_token>" \
   -H "Content-Type: application/json" \
   -d '{"name":"My Key"}'
@@ -74,7 +74,7 @@ Copy `api_key` immediately — shown once.
 **3. Everything else** — use API key:
 
 ```bash
-curl -X POST https://api.oneinbox.ai/v1/agents \
+curl -X POST http://13.207.23.185:8000/v1/agents \
   -H "Authorization: Bearer <api_key>" \
   ...
 ```

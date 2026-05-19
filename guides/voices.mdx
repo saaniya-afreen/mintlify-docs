@@ -17,11 +17,11 @@ description: List built-in voices or import custom ones from ElevenLabs.
 
 ```bash
 # All voices
-curl https://api.oneinbox.ai/v1/voices \
+curl http://13.207.23.185:8000/v1/voices \
   -H "Authorization: Bearer <api_key>"
 
 # Filter by provider
-curl "https://api.oneinbox.ai/v1/voices?provider=cartesia" \
+curl "http://13.207.23.185:8000/v1/voices?provider=cartesia" \
   -H "Authorization: Bearer <api_key>"
 ```
 
@@ -36,7 +36,7 @@ Pick a `voice_id` and use it in your agent's `tts` block.
 First, [add an ElevenLabs integration](/concepts/integrations). Then:
 
 ```bash
-curl -X POST https://api.oneinbox.ai/v1/voices/import \
+curl -X POST http://13.207.23.185:8000/v1/voices/import \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{

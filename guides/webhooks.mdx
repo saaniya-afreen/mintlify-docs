@@ -22,7 +22,7 @@ description: Receive call events on your server.
 <Step title="1. Create a webhook">
 
 ```bash
-curl -X POST https://api.oneinbox.ai/v1/webhooks \
+curl -X POST http://13.207.23.185:8000/v1/webhooks \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -43,7 +43,7 @@ curl -X POST https://api.oneinbox.ai/v1/webhooks \
 Send a test payload to your URL:
 
 ```bash
-curl -X POST https://api.oneinbox.ai/v1/webhooks/<webhook_id>/test \
+curl -X POST http://13.207.23.185:8000/v1/webhooks/<webhook_id>/test \
   -H "Authorization: Bearer <api_key>"
 ```
 
@@ -55,11 +55,11 @@ Check your server logs for the incoming request.
 
 ```bash
 # List all
-curl https://api.oneinbox.ai/v1/webhooks \
+curl http://13.207.23.185:8000/v1/webhooks \
   -H "Authorization: Bearer <api_key>"
 
 # Update events
-curl -X PATCH https://api.oneinbox.ai/v1/webhooks/<webhook_id> \
+curl -X PATCH http://13.207.23.185:8000/v1/webhooks/<webhook_id> \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -67,7 +67,7 @@ curl -X PATCH https://api.oneinbox.ai/v1/webhooks/<webhook_id> \
   }'
 
 # Delete
-curl -X DELETE https://api.oneinbox.ai/v1/webhooks/<webhook_id> \
+curl -X DELETE http://13.207.23.185:8000/v1/webhooks/<webhook_id> \
   -H "Authorization: Bearer <api_key>"
 ```
 

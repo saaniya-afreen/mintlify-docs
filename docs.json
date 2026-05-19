@@ -31,7 +31,7 @@
           "links": [
             {
               "label": "API",
-              "href": "https://api.oneinbox.ai"
+              "href": "http://13.207.23.185:8000"
             }
           ],
           "primary": {
@@ -85,7 +85,7 @@
           "links": [
             {
               "label": "API",
-              "href": "https://api.oneinbox.ai"
+              "href": "http://13.207.23.185:8000"
             }
           ],
           "primary": {

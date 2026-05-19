@@ -102,7 +102,7 @@ See **[Build your first agent](/quickstart/first-agent)** step 4 for a copy-past
 Change voice, greeting, or link a different LLM without recreating:
 
 ```bash
-curl -X PATCH https://api.oneinbox.ai/v1/agents/<agent_id> \
+curl -X PATCH http://13.207.23.185:8000/v1/agents/<agent_id> \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{

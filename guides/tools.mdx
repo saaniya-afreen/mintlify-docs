@@ -24,7 +24,7 @@ description: Give your agent actions — call APIs, transfer, or end the call.
 **Example — call your API:**
 
 ```bash
-curl -X POST https://api.oneinbox.ai/v1/tools \
+curl -X POST http://13.207.23.185:8000/v1/tools \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -47,7 +47,7 @@ curl -X POST https://api.oneinbox.ai/v1/tools \
 **Transfer to a human:**
 
 ```bash
-curl -X POST https://api.oneinbox.ai/v1/tools \
+curl -X POST http://13.207.23.185:8000/v1/tools \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -61,7 +61,7 @@ curl -X POST https://api.oneinbox.ai/v1/tools \
 **End the call:**
 
 ```bash
-curl -X POST https://api.oneinbox.ai/v1/tools \
+curl -X POST http://13.207.23.185:8000/v1/tools \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -80,7 +80,7 @@ curl -X POST https://api.oneinbox.ai/v1/tools \
 Update your model (or set `tool_ids` when creating it):
 
 ```bash
-curl -X PATCH https://api.oneinbox.ai/v1/models/<llm_id> \
+curl -X PATCH http://13.207.23.185:8000/v1/models/<llm_id> \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -96,15 +96,15 @@ Your agent already linked to this `llm_id` picks up the change automatically.
 
 ```bash
 # List all
-curl https://api.oneinbox.ai/v1/tools \
+curl http://13.207.23.185:8000/v1/tools \
   -H "Authorization: Bearer <api_key>"
 
 # Get one
-curl https://api.oneinbox.ai/v1/tools/<tool_id> \
+curl http://13.207.23.185:8000/v1/tools/<tool_id> \
   -H "Authorization: Bearer <api_key>"
 
 # Delete
-curl -X DELETE https://api.oneinbox.ai/v1/tools/<tool_id> \
+curl -X DELETE http://13.207.23.185:8000/v1/tools/<tool_id> \
   -H "Authorization: Bearer <api_key>"
 ```
 
