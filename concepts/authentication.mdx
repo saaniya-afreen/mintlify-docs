@@ -1,0 +1,44 @@
+---
+title: Authentication
+description: API keys vs JWT tokens — which to use and when.
+---
+
+## Two tokens, two jobs
+
+| Token | Header | Get it from | Use for |
+| --- | --- | --- | --- |
+| JWT (`access_token`) | `Authorization: Bearer <jwt>` | `POST /v1/auth/signup` or `/login` | Creating and revoking API keys only |
+| API key (`api_key`) | `Authorization: Bearer <api_key>` | `POST /v1/api-keys` | **All resources** — agents, calls, integrations |
+
+```mermaid
+flowchart LR
+  Signup[Sign up] --> JWT[JWT]
+  JWT -->|once| CreateKey[Create API key]
+  CreateKey --> APIKey[api_key]
+  APIKey --> Everything[Agents · Calls · Integrations · …]
+```
+
+---
+
+## Common mistake
+
+Using the JWT for resource calls returns `401`. After creating your API key, **only use `api_key`**.
+
+---
+
+## Quick reference
+
+```bash
+# Sign up (no auth)
+curl -X POST https://api.oneinbox.ai/v1/auth/signup ...
+
+# Create API key (JWT auth)
+curl -X POST https://api.oneinbox.ai/v1/api-keys \
+  -H "Authorization: Bearer <jwt>" ...
+
+# Everything else (API key auth)
+curl -X POST https://api.oneinbox.ai/v1/agents \
+  -H "Authorization: Bearer <api_key>" ...
+```
+
+See [Sign up](/api-reference/auth/sign-up) and [Create API key](/api-reference/api-keys/create-api-key).

@@ -1,0 +1,109 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "OneInbox",
+  "description": "The developer platform for voice AI agents",
+  "colors": {
+    "primary": "#2563EB",
+    "light": "#EFF6FF",
+    "dark": "#1E3A8A"
+  },
+  "favicon": "/favicon.svg",
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "api": {
+    "openapi": "openapi/openapi.yaml",
+    "playground": {
+      "display": "interactive"
+    },
+    "examples": {
+      "languages": ["curl", "python", "javascript", "go"]
+    }
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "API",
+        "href": "https://api.oneinbox.ai"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Quickstart",
+      "href": "/quickstart/first-agent"
+    }
+  },
+  "navigation": {
+    "languages": [
+      {
+        "language": "en",
+        "tabs": [
+          {
+            "tab": "Documentation",
+            "groups": [
+              {
+                "group": "Get started",
+                "pages": [
+                  "introduction",
+                  "quickstart/first-agent",
+                  "quickstart/phone-calls"
+                ]
+              },
+              {
+                "group": "Core concepts",
+                "pages": [
+                  "concepts/how-it-works",
+                  "concepts/resources",
+                  "concepts/authentication",
+                  "concepts/integrations",
+                  "concepts/agents"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "API Reference",
+            "openapi": "openapi/openapi.yaml"
+          }
+        ]
+      },
+      {
+        "language": "jp",
+        "tabs": [
+          {
+            "tab": "ドキュメント",
+            "groups": [
+              {
+                "group": "はじめる",
+                "pages": [
+                  "jp/introduction",
+                  "jp/quickstart/first-agent",
+                  "quickstart/phone-calls"
+                ]
+              },
+              {
+                "group": "コアコンセプト",
+                "pages": [
+                  "jp/concepts/how-it-works",
+                  "jp/concepts/resources",
+                  "jp/concepts/authentication",
+                  "jp/concepts/integrations",
+                  "jp/concepts/agents"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "API リファレンス",
+            "openapi": "openapi/openapi.yaml"
+          }
+        ]
+      }
+    ]
+  },
+  "footer": {
+    "socials": {}
+  }
+}

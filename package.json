@@ -1,0 +1,11 @@
+{
+  "name": "oneinbox-docs-mintlify",
+  "private": true,
+  "scripts": {
+    "dev": "mintlify dev --port 3333",
+    "sync": "node scripts/sync-from-docusaurus.mjs"
+  },
+  "devDependencies": {
+    "mintlify": "^4.2.359"
+  }
+}

@@ -1,0 +1,167 @@
+---
+title: 最初のエージェントを作る
+description: APIキー作成、OpenAI接続、ブラウザ通話まで約5分。
+---
+
+## 概要
+
+このクイックスタートでは、動作する音声エージェントを作成し、ブラウザで会話します。電話番号は不要です。
+
+**内容:**
+
+- OneInbox アカウントと API キーの作成
+- OpenAI **インテグレーション**の追加
+- **LLM モデル**（頭脳）の定義
+- **エージェント**（STT + LLM + TTS）の組み立て
+- **ブラウザでテスト**（開発・デモ用）
+
+**所要時間:** 約5分
+
+---
+
+## 前提条件
+
+- [OpenAI API キー](https://platform.openai.com)
+- `curl` または [Postman](https://www.postman.com/)
+
+Twilio や ElevenLabs は**不要**です。
+
+---
+
+## 2種類のトークン
+
+| トークン | 取得方法 | 用途 |
+| --- | --- | --- |
+| `access_token` (JWT) | サインアップ | API キー作成**のみ** |
+| `api_key` | ステップ1後 | **それ以外すべて** |
+
+ステップ1以降は `api_key` のみ使用してください。
+
+---
+
+<Steps>
+
+<Step title="1. API キーを作成">
+
+**サインアップ:**
+
+```bash
+curl -X POST https://api.oneinbox.ai/v1/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "you@yourcompany.com",
+    "password": "your-secure-password",
+    "name": "Your Name",
+    "organization_name": "Your Company"
+  }'
+```
+
+**API キー作成** (`access_token` を使用):
+
+```bash
+curl -X POST https://api.oneinbox.ai/v1/api-keys \
+  -H "Authorization: Bearer <access_token>" \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "My First Key" }'
+```
+
+<Warning>
+`api_key` は一度だけ表示されます。以降は `Authorization: Bearer <api_key>` を使用。
+</Warning>
+
+</Step>
+
+<Step title="2. OpenAI インテグレーションを追加">
+
+```bash
+curl -X POST https://api.oneinbox.ai/v1/credentials \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "OpenAI",
+    "provider": "openai",
+    "api_key": "<your_openai_api_key>"
+  }'
+```
+
+`id` を保存（一部で `credential_id` という名前）。
+
+</Step>
+
+<Step title="3. LLM モデルを作成">
+
+```bash
+curl -X POST https://api.oneinbox.ai/v1/models \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "My First Model",
+    "provider": "openai",
+    "model": "gpt-4o-mini",
+    "system_prompt": "You are Alex, a friendly assistant. Keep every response under two sentences.",
+    "temperature": 0.7,
+    "max_tokens": 4000,
+    "tool_ids": [],
+    "knowledge_base_ids": []
+  }'
+```
+
+`id` を **`llm_id`** として保存。
+
+</Step>
+
+<Step title="4. エージェントを作成">
+
+```bash
+curl -X POST https://api.oneinbox.ai/v1/agents \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Alex",
+    "llm_id": "<llm_id>",
+    "transcriber": { "provider": "deepgram", "model": "nova-3", "language": "en" },
+    "tts": { "provider": "deepgram", "voice_id": "asteria", "speed": 1.0, "stability": 0.5 },
+    "first_message": "Hi! I am Alex. How can I help you today?",
+    "end_call_phrases": ["goodbye", "bye"],
+    "silence_timeout_seconds": 10,
+    "max_duration_seconds": 600
+  }'
+```
+
+`id` を **`agent_id`** として保存。
+
+</Step>
+
+<Step title="5. ブラウザでテスト（開発用）">
+
+<Info>
+ブラウザテストは**開発・デモ用**です。本番の音声通話は [電話通話](/quickstart/phone-calls) を使用してください。
+</Info>
+
+```bash
+curl -X POST https://api.oneinbox.ai/v1/calls/web \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{ "agent_id": "<agent_id>", "variables": { "customer_name": "Alex" } }'
+```
+
+ブラウザで開く:
+
+```
+https://meet.oneinbox.ai?token=<participant_token>&server=<server_url>
+```
+
+</Step>
+
+</Steps>
+
+---
+
+## 次のステップ
+
+<CardGroup cols={2}>
+  <Card title="電話通話" icon="phone" href="/quickstart/phone-calls">電話番号での通話</Card>
+  <Card title="インテグレーション" icon="key" href="/jp/concepts/integrations">プロバイダーキー</Card>
+  <Card title="エージェント" icon="robot" href="/jp/concepts/agents">STT・TTS 設定</Card>
+  <Card title="API リファレンス" icon="code" href="/api-reference/calls/start-browser-test-call">通話 API</Card>
+</CardGroup>

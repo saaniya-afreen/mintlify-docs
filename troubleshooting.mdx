@@ -1,0 +1,44 @@
+---
+title: "Troubleshooting"
+description: "## \"Next.js hydration error\" with `data-layerpath-*` on `<html>`"
+---
+
+## "Next.js hydration error" with `data-layerpath-*` on `<html>`
+
+If the console shows **Next.js 16** and attributes like:
+
+```html
+data-layerpath-loaded="true"
+data-layerpath-ready="true"
+```
+
+on the `<html>` tag, that is **not from this Docusaurus site**. A browser extension (LayerPath) is modifying the page before React hydrates.
+
+### Fix
+
+1. Disable the **LayerPath** extension (Chrome → Extensions → LayerPath → Off).
+2. Hard-refresh the page (`Cmd+Shift+R`).
+3. Confirm you are running **this** docs server:
+
+   ```bash
+   cd docs-site
+   npm start
+   ```
+
+   Open **http://localhost:3001/** (port **3001** avoids conflicts with Next.js on 3000).
+
+4. If you also run a separate Next.js app on port 3000, do not open that URL for OneInbox docs.
+
+### If you maintain a Next.js app separately
+
+Add `suppressHydrationWarning` to `<html>` and `<body>` in `src/app/layout.tsx`:
+
+```tsx
+<html lang="en" suppressHydrationWarning className={...}>
+  <body suppressHydrationWarning className={...}>
+    {children}
+  </body>
+</html>
+```
+
+This silences extension-injected attribute mismatches during development. Prefer disabling the extension when possible.

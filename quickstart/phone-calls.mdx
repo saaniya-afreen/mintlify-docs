@@ -1,0 +1,107 @@
+---
+title: Phone calls
+description: Make outbound calls and set up inbound numbers with Twilio.
+---
+
+## Overview
+
+Phone calls use Twilio for telephony. You'll need a **Twilio integration** and a **phone number** before calling real phones.
+
+**Best for:**
+
+- Outbound sales and lead qualification
+- Inbound support lines
+- Appointment reminders
+
+---
+
+## Prerequisites
+
+- Completed **[Build your first agent](/quickstart/first-agent)**
+- A [Twilio account](https://www.twilio.com) with an Auth Token
+
+---
+
+<Steps>
+
+<Step title="1. Add a Twilio integration">
+
+Store your Twilio Auth Token (not Account SID):
+
+```bash
+curl -X POST https://api.oneinbox.ai/v1/credentials \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Twilio Production",
+    "provider": "twilio",
+    "api_key": "<your_twilio_auth_token>"
+  }'
+```
+
+Save the integration `id` as `twilio_integration_id`.
+
+</Step>
+
+<Step title="2. Search for a phone number">
+
+```bash
+curl "https://api.oneinbox.ai/v1/phone-numbers/search?country=US&limit=10&credential_id=<twilio_integration_id>" \
+  -H "Authorization: Bearer <api_key>"
+```
+
+</Step>
+
+<Step title="3. Register the number">
+
+Assign your agent to handle inbound calls on that number:
+
+```bash
+curl -X POST https://api.oneinbox.ai/v1/phone-numbers \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phone_number": "+14155551234",
+    "credential_id": "<twilio_integration_id>",
+    "agent_id": "<agent_id>",
+    "name": "Support Line"
+  }'
+```
+
+</Step>
+
+<Step title="4. Make an outbound call">
+
+```bash
+curl -X POST https://api.oneinbox.ai/v1/calls \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "<agent_id>",
+    "phone_number": "+14155559876",
+    "variables": { "customer_name": "Sam" }
+  }'
+```
+
+Your agent dials the number and starts the conversation.
+
+</Step>
+
+</Steps>
+
+---
+
+## Inbound vs outbound
+
+| Type | How it works |
+| --- | --- |
+| **Inbound** | Caller dials your registered number → agent answers with `first_message` |
+| **Outbound** | You call `POST /v1/calls` → agent dials the target number |
+
+---
+
+## Next steps
+
+- **[Integrations](/concepts/integrations)** — all supported providers
+- **[Search phone numbers](/api-reference/phone-numbers/search-phone-numbers)** — search, register, update
+- **[Create outbound call](/api-reference/calls/create-outbound-call)** — outbound call options

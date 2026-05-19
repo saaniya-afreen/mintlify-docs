@@ -1,0 +1,262 @@
+---
+title: Build your first agent
+description: Create an API key, connect OpenAI, and make a browser call in 5 minutes.
+---
+
+## Overview
+
+In this quickstart you'll create a working voice agent and talk to it in your browser. No phone number required.
+
+**You'll:**
+
+- Create a OneInbox account and API key
+- Store your OpenAI key as an **Integration**
+- Define an **LLM model** (the brain)
+- Assemble an **Agent** (STT + LLM + TTS)
+- Test your agent in the **browser** (dev/demo via meet link)
+
+**Time:** ~5 minutes
+
+---
+
+## Prerequisites
+
+- An [OpenAI API key](https://platform.openai.com) (for the LLM)
+- Terminal with `curl`, or [Postman](https://www.postman.com/)
+
+You do **not** need Twilio or ElevenLabs for this guide.
+
+---
+
+## Before you start: two tokens
+
+OneInbox uses two tokens. This trips up almost every new developer:
+
+| Token | When you get it | Use it for |
+| --- | --- | --- |
+| `access_token` (JWT) | Sign up / log in | Creating your API key **only** |
+| `api_key` | After step 1 below | **Everything else** — agents, calls, integrations |
+
+After step 1, forget the JWT. Use `api_key` for all remaining steps.
+
+---
+
+<Steps>
+
+<Step title="1. Create your API key">
+
+**Why:** Your API key is how OneInbox knows requests are coming from you.
+
+**Sign up** — returns a JWT you'll use once:
+
+```bash
+curl -X POST https://api.oneinbox.ai/v1/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "you@yourcompany.com",
+    "password": "your-secure-password",
+    "name": "Your Name",
+    "organization_name": "Your Company"
+  }'
+```
+
+Copy `access_token` from the response.
+
+**Create an API key** — use the JWT from above:
+
+```bash
+curl -X POST https://api.oneinbox.ai/v1/api-keys \
+  -H "Authorization: Bearer <access_token>" \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "My First Key" }'
+```
+
+<ResponseExample>
+
+```json
+{
+  "id": "key_abc123",
+  "name": "My First Key",
+  "api_key": "oi_live_xxxxxxxxxxxxxxxxxxxx"
+}
+```
+
+</ResponseExample>
+
+<Warning>
+Copy `api_key` now — it is shown **once**. All steps below use:
+
+```
+Authorization: Bearer <api_key>
+```
+</Warning>
+
+</Step>
+
+<Step title="2. Add an OpenAI integration">
+
+**Why:** OneInbox needs your OpenAI key to run the LLM. We encrypt it and never echo it back.
+
+**What you're creating:** An **Integration** — your stored OpenAI credentials.
+
+```bash
+curl -X POST https://api.oneinbox.ai/v1/credentials \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "OpenAI",
+    "provider": "openai",
+    "api_key": "<your_openai_api_key>"
+  }'
+```
+
+<ResponseExample>
+
+```json
+{
+  "id": "cred_openai_abc123",
+  "name": "OpenAI",
+  "provider": "openai"
+}
+```
+
+</ResponseExample>
+
+Save `id` — you may reference it as `credential_id` in other resources.
+
+</Step>
+
+<Step title="3. Create an LLM model">
+
+**Why:** The LLM model is the brain — it reads what the user said and decides what to reply.
+
+**What you're creating:** A reusable **LLM model** with a system prompt and model name.
+
+```bash
+curl -X POST https://api.oneinbox.ai/v1/models \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "My First Model",
+    "provider": "openai",
+    "model": "gpt-4o-mini",
+    "system_prompt": "You are Alex, a friendly assistant. Keep every response under two sentences. Be warm and direct.",
+    "temperature": 0.7,
+    "max_tokens": 4000,
+    "tool_ids": [],
+    "knowledge_base_ids": []
+  }'
+```
+
+Save the response `id` as **`llm_id`**.
+
+</Step>
+
+<Step title="4. Create an agent">
+
+**Why:** An agent wires the LLM to ears (STT) and a voice (TTS), plus call behavior like the opening line.
+
+**What you're creating:** A complete **Agent** ready to take calls.
+
+```bash
+curl -X POST https://api.oneinbox.ai/v1/agents \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Alex",
+    "llm_id": "<llm_id>",
+    "transcriber": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "en"
+    },
+    "tts": {
+      "provider": "deepgram",
+      "voice_id": "asteria",
+      "speed": 1.0,
+      "stability": 0.5
+    },
+    "first_message": "Hi! I am Alex. How can I help you today?",
+    "end_call_phrases": ["goodbye", "bye", "that is all"],
+    "silence_timeout_seconds": 10,
+    "max_duration_seconds": 600
+  }'
+```
+
+Save the response `id` as **`agent_id`**.
+
+</Step>
+
+<Step title="5. Test in the browser (dev)">
+
+**Why:** Hear your agent before wiring up phone numbers. This opens a **meet link** for testing — not an embeddable widget for your site.
+
+<Info>
+Browser test calls are for **development and demos**. Production voice today is **phone calls** via Twilio. See [Phone calls](/quickstart/phone-calls).
+</Info>
+
+```bash
+curl -X POST https://api.oneinbox.ai/v1/calls/web \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "<agent_id>",
+    "variables": { "customer_name": "Alex" }
+  }'
+```
+
+<ResponseExample>
+
+```json
+{
+  "id": "<call_id>",
+  "server_url": "wss://...",
+  "participant_token": "eyJhbGci..."
+}
+```
+
+</ResponseExample>
+
+**Open in your browser:**
+
+```
+https://meet.oneinbox.ai?token=<participant_token>&server=<server_url>
+```
+
+Allow microphone access. Alex speaks within a few seconds. Say **"goodbye"** to end.
+
+</Step>
+
+</Steps>
+
+---
+
+## Verify it worked
+
+After the call ends, fetch the transcript:
+
+```bash
+curl https://api.oneinbox.ai/v1/calls/<call_id> \
+  -H "Authorization: Bearer <api_key>"
+```
+
+You should see `status: "completed"` and a full transcript.
+
+---
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Phone calls" icon="phone" href="/quickstart/phone-calls">
+    Outbound and inbound with real numbers
+  </Card>
+  <Card title="Integrations" icon="key" href="/concepts/integrations">
+    Add Twilio, ElevenLabs, Gemini
+  </Card>
+  <Card title="Agents" icon="robot" href="/concepts/agents">
+    Tune STT, TTS, and behavior
+  </Card>
+  <Card title="API reference" icon="code" href="/api-reference/calls/start-browser-test-call">
+    Call endpoints
+  </Card>
+</CardGroup>

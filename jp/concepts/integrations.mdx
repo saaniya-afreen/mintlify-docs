@@ -1,0 +1,16 @@
+---
+title: インテグレーション
+description: OpenAI、Twilio、ElevenLabs などの API キーを安全に保存。
+---
+
+**インテグレーション** = 暗号化されたサードパーティ API キー。
+
+<Info>
+API パスは `/v1/credentials`。フィールド名は `credential_id` の場合あり。
+</Info>
+
+| プロバイダー | `provider` | 用途 |
+| --- | --- | --- |
+| OpenAI | `openai` | LLM |
+| Twilio | `twilio` | 電話 |
+| ElevenLabs | `elevenlabs` | カスタム音声 |

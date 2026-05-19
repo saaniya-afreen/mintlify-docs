@@ -1,0 +1,1083 @@
+openapi: 3.1.0
+info:
+  title: OneInbox API
+  version: 1.0.0
+  description: |
+    REST API for building voice AI agents.
+
+    **Base URL:** `https://api.oneinbox.ai`
+
+    ## Authentication
+
+    | Endpoints | Header |
+    | --- | --- |
+    | `POST /v1/auth/*` | None |
+    | `/v1/api-keys` | `Authorization: Bearer <jwt_token>` |
+    | All other endpoints | `Authorization: Bearer <api_key>` |
+
+    Integrations are stored at `/v1/credentials` (docs call them **Integrations**).
+
+servers:
+  - url: https://api.oneinbox.ai
+    description: Production
+
+tags:
+  - name: Auth
+    description: Sign up, login, and session management
+  - name: API Keys
+    description: Create and revoke API keys (requires JWT)
+  - name: Integrations
+    description: Store third-party provider API keys (OpenAI, Twilio, etc.)
+  - name: LLM Models
+    description: Define the brain — model, system prompt, tools
+  - name: Agents
+    description: Assemble STT + LLM + TTS into a voice agent
+  - name: Calls
+    description: Browser test calls and outbound phone calls
+  - name: Voices
+    description: List and import TTS voices
+  - name: Tools
+    description: Extend agents with API calls and actions
+  - name: Webhooks
+    description: Receive call lifecycle events
+  - name: Knowledge Bases
+    description: RAG documents for your agent
+  - name: Phone Numbers
+    description: Search and register Twilio numbers
+  - name: Health
+    description: Service health check
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: http
+      scheme: bearer
+      description: API key from `POST /v1/api-keys`
+    JwtAuth:
+      type: http
+      scheme: bearer
+      description: JWT from signup or login
+
+  schemas:
+    SignupRequest:
+      type: object
+      required: [email, password, name]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        name:
+          type: string
+        organization_name:
+          type: string
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    TokenResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+    CreateApiKeyRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+    ApiKeyResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        api_key:
+          type: string
+          description: Shown only once on create
+        created_at:
+          type: string
+          format: date-time
+    CreateIntegrationRequest:
+      type: object
+      required: [name, provider, api_key]
+      properties:
+        name:
+          type: string
+        provider:
+          type: string
+          enum: [openai, gemini, elevenlabs, cartesia, deepgram, twilio]
+        api_key:
+          type: string
+          description: Provider API key. For Twilio, use Auth Token.
+    IntegrationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        provider:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    CreateModelRequest:
+      type: object
+      required: [name, provider, model, system_prompt]
+      properties:
+        name:
+          type: string
+        provider:
+          type: string
+          enum: [openai, gemini, anthropic]
+        model:
+          type: string
+          example: gpt-4o-mini
+        system_prompt:
+          type: string
+        temperature:
+          type: number
+          default: 0.7
+        max_tokens:
+          type: integer
+          default: 4000
+        tool_ids:
+          type: array
+          items:
+            type: string
+        knowledge_base_ids:
+          type: array
+          items:
+            type: string
+    ModelResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        provider:
+          type: string
+        model:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    TranscriberConfig:
+      type: object
+      required: [provider, model, language]
+      properties:
+        provider:
+          type: string
+          example: deepgram
+        model:
+          type: string
+          example: nova-3
+        language:
+          type: string
+          example: en
+    TtsConfig:
+      type: object
+      required: [provider, voice_id]
+      properties:
+        provider:
+          type: string
+          enum: [deepgram, cartesia, elevenlabs]
+        voice_id:
+          type: string
+        speed:
+          type: number
+          default: 1.0
+        stability:
+          type: number
+          default: 0.5
+    CreateAgentRequest:
+      type: object
+      required: [name, llm_id, transcriber, tts]
+      properties:
+        name:
+          type: string
+        llm_id:
+          type: string
+        webhook_id:
+          type: string
+        transcriber:
+          $ref: '#/components/schemas/TranscriberConfig'
+        tts:
+          $ref: '#/components/schemas/TtsConfig'
+        first_message:
+          type: string
+        end_call_phrases:
+          type: array
+          items:
+            type: string
+        silence_timeout_seconds:
+          type: integer
+          default: 10
+        max_duration_seconds:
+          type: integer
+          default: 600
+    AgentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        llm_id:
+          type: string
+        first_message:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    WebCallRequest:
+      type: object
+      required: [agent_id]
+      properties:
+        agent_id:
+          type: string
+        variables:
+          type: object
+          additionalProperties:
+            type: string
+    WebCallResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        server_url:
+          type: string
+        participant_token:
+          type: string
+    OutboundCallRequest:
+      type: object
+      required: [agent_id, to_number, from_number]
+      properties:
+        agent_id:
+          type: string
+        to_number:
+          type: string
+          description: E.164 format
+          example: "+14155559876"
+        from_number:
+          type: string
+          description: Registered OneInbox number
+        variables:
+          type: object
+          additionalProperties:
+            type: string
+        webhook_url:
+          type: string
+    CallResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+        duration_seconds:
+          type: integer
+        transcript:
+          type: array
+          items:
+            type: object
+            properties:
+              role:
+                type: string
+              content:
+                type: string
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+
+paths:
+  /v1/auth/signup:
+    post:
+      tags: [Auth]
+      summary: Sign up
+      description: Create a new account and receive a JWT token.
+      operationId: signup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+            example:
+              email: dev@acme.com
+              password: your-secure-password
+              name: Alex Developer
+              organization_name: Acme Inc
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+
+  /v1/auth/login:
+    post:
+      tags: [Auth]
+      summary: Log in
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+
+  /v1/auth/me:
+    get:
+      tags: [Auth]
+      summary: Get current user
+      operationId: getCurrentUser
+      security:
+        - JwtAuth: []
+      responses:
+        '200':
+          description: OK
+
+  /v1/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Log out
+      operationId: logout
+      security:
+        - JwtAuth: []
+      responses:
+        '200':
+          description: OK
+
+  /v1/api-keys:
+    post:
+      tags: [API Keys]
+      summary: Create API key
+      description: Returns `api_key` once. Use it for all resource endpoints.
+      operationId: createApiKey
+      security:
+        - JwtAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateApiKeyRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyResponse'
+    get:
+      tags: [API Keys]
+      summary: List API keys
+      operationId: listApiKeys
+      security:
+        - JwtAuth: []
+      responses:
+        '200':
+          description: OK
+
+  /v1/api-keys/{key_id}:
+    delete:
+      tags: [API Keys]
+      summary: Revoke API key
+      operationId: revokeApiKey
+      security:
+        - JwtAuth: []
+      parameters:
+        - name: key_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content
+
+  /v1/credentials:
+    post:
+      tags: [Integrations]
+      summary: Create integration
+      operationId: createIntegration
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateIntegrationRequest'
+            example:
+              name: OpenAI Production
+              provider: openai
+              api_key: sk-...
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationResponse'
+    get:
+      tags: [Integrations]
+      summary: List integrations
+      operationId: listIntegrations
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: OK
+
+  /v1/credentials/{credential_id}:
+    get:
+      tags: [Integrations]
+      summary: Get integration
+      operationId: getIntegration
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: credential_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+    patch:
+      tags: [Integrations]
+      summary: Update integration
+      operationId: updateIntegration
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: credential_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+    delete:
+      tags: [Integrations]
+      summary: Delete integration
+      operationId: deleteIntegration
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: credential_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content
+
+  /v1/models:
+    post:
+      tags: [LLM Models]
+      summary: Create LLM model
+      operationId: createModel
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateModelRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelResponse'
+    get:
+      tags: [LLM Models]
+      summary: List LLM models
+      operationId: listModels
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: OK
+
+  /v1/models/{llm_id}:
+    get:
+      tags: [LLM Models]
+      summary: Get LLM model
+      operationId: getModel
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: llm_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+    patch:
+      tags: [LLM Models]
+      summary: Update LLM model
+      operationId: updateModel
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: llm_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+    delete:
+      tags: [LLM Models]
+      summary: Delete LLM model
+      operationId: deleteModel
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: llm_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content
+
+  /v1/agents:
+    post:
+      tags: [Agents]
+      summary: Create agent
+      operationId: createAgent
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAgentRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponse'
+    get:
+      tags: [Agents]
+      summary: List agents
+      operationId: listAgents
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: OK
+
+  /v1/agents/{agent_id}:
+    get:
+      tags: [Agents]
+      summary: Get agent
+      operationId: getAgent
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+    patch:
+      tags: [Agents]
+      summary: Update agent
+      operationId: updateAgent
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+    delete:
+      tags: [Agents]
+      summary: Delete agent
+      operationId: deleteAgent
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content
+
+  /v1/calls/web:
+    post:
+      tags: [Calls]
+      summary: Start browser test call
+      description: |
+        Dev/demo only. Returns a meet URL token — not for embedding in your product.
+        Always call from your backend; never expose `api_key` in frontend code.
+      operationId: createWebCall
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebCallRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebCallResponse'
+
+  /v1/calls:
+    post:
+      tags: [Calls]
+      summary: Create outbound call
+      operationId: createOutboundCall
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OutboundCallRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallResponse'
+    get:
+      tags: [Calls]
+      summary: List calls
+      operationId: listCalls
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: agent_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+
+  /v1/calls/{call_id}:
+    get:
+      tags: [Calls]
+      summary: Get call
+      operationId: getCall
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: call_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallResponse'
+    delete:
+      tags: [Calls]
+      summary: Delete call
+      operationId: deleteCall
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: call_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content
+
+  /v1/calls/{call_id}/stop:
+    post:
+      tags: [Calls]
+      summary: Stop call
+      operationId: stopCall
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: call_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+
+  /v1/voices:
+    get:
+      tags: [Voices]
+      summary: List voices
+      operationId: listVoices
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: provider
+          in: query
+          schema:
+            type: string
+            enum: [cartesia, deepgram, elevenlabs]
+      responses:
+        '200':
+          description: OK
+
+  /v1/voices/{voice_id}:
+    get:
+      tags: [Voices]
+      summary: Get voice
+      operationId: getVoice
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: voice_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+
+  /v1/voices/import:
+    post:
+      tags: [Voices]
+      summary: Import voice
+      operationId: importVoice
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '201':
+          description: Created
+
+  /v1/tools:
+    get:
+      tags: [Tools]
+      summary: List tools
+      operationId: listTools
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: OK
+    post:
+      tags: [Tools]
+      summary: Create tool
+      operationId: createTool
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '201':
+          description: Created
+
+  /v1/tools/{tool_id}:
+    get:
+      tags: [Tools]
+      summary: Get tool
+      operationId: getTool
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: tool_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+    patch:
+      tags: [Tools]
+      summary: Update tool
+      operationId: updateTool
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: tool_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+    delete:
+      tags: [Tools]
+      summary: Delete tool
+      operationId: deleteTool
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: tool_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content
+
+  /v1/webhooks:
+    get:
+      tags: [Webhooks]
+      summary: List webhooks
+      operationId: listWebhooks
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: OK
+    post:
+      tags: [Webhooks]
+      summary: Create webhook
+      operationId: createWebhook
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '201':
+          description: Created
+
+  /v1/webhooks/{webhook_id}:
+    get:
+      tags: [Webhooks]
+      summary: Get webhook
+      operationId: getWebhook
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: webhook_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+    delete:
+      tags: [Webhooks]
+      summary: Delete webhook
+      operationId: deleteWebhook
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: webhook_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content
+
+  /v1/knowledge-bases:
+    get:
+      tags: [Knowledge Bases]
+      summary: List knowledge bases
+      operationId: listKnowledgeBases
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: OK
+    post:
+      tags: [Knowledge Bases]
+      summary: Create knowledge base
+      operationId: createKnowledgeBase
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '201':
+          description: Created
+
+  /v1/knowledge-bases/{kb_id}:
+    get:
+      tags: [Knowledge Bases]
+      summary: Get knowledge base
+      operationId: getKnowledgeBase
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: kb_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+    delete:
+      tags: [Knowledge Bases]
+      summary: Delete knowledge base
+      operationId: deleteKnowledgeBase
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: kb_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content
+
+  /v1/phone-numbers/search:
+    get:
+      tags: [Phone Numbers]
+      summary: Search phone numbers
+      operationId: searchPhoneNumbers
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: country
+          in: query
+          required: true
+          schema:
+            type: string
+            example: US
+        - name: credential_id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Twilio integration ID
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: OK
+
+  /v1/phone-numbers:
+    get:
+      tags: [Phone Numbers]
+      summary: List phone numbers
+      operationId: listPhoneNumbers
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: OK
+    post:
+      tags: [Phone Numbers]
+      summary: Register phone number
+      operationId: registerPhoneNumber
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '201':
+          description: Created
+
+  /v1/phone-numbers/{phone_number_id}:
+    get:
+      tags: [Phone Numbers]
+      summary: Get phone number
+      operationId: getPhoneNumber
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: phone_number_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+    delete:
+      tags: [Phone Numbers]
+      summary: Delete phone number
+      operationId: deletePhoneNumber
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: phone_number_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content
+
+  /v1/health:
+    get:
+      tags: [Health]
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        '200':
+          description: OK
