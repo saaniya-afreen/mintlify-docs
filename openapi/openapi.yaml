@@ -342,8 +342,44 @@ components:
         type:
           type: string
           enum: [url, text]
+          description: |
+            - `url` — OneInbox crawls a public URL, chunks it, and creates embeddings
+            - `text` — Raw text is chunked and embedded directly
         source:
           type: string
+          description: |
+            When `type` is `url`: a public HTTPS URL (e.g. `https://docs.example.com/faq`).
+            When `type` is `text`: the raw text content to index.
+          example: https://docs.example.com/faq
+    KnowledgeBaseResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        chunk_size:
+          type: integer
+        multilingual:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+    KnowledgeBaseSourceResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [url, text]
+        source:
+          type: string
+        status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
     CreateToolRequest:
       type: object
       required: [name, type, description]
@@ -1173,6 +1209,15 @@ paths:
       responses:
         '201':
           description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseResponse'
+              example:
+                id: kb_abc123
+                name: Product Docs
+                chunk_size: 512
+                multilingual: false
 
   /v1/knowledge-bases/{kb_id}:
     get:
@@ -1247,7 +1292,12 @@ paths:
       tags: [Knowledge Bases]
       summary: Add knowledge base source
       operationId: addKnowledgeBaseSource
-      description: Add content from a URL or raw text.
+      description: |
+        Add content to a knowledge base.
+
+        **URL (`type: url`):** OneInbox fetches the page, splits it into chunks, and creates embeddings. Use public HTTPS URLs.
+
+        **Text (`type: text`):** Paste raw text directly — policies, FAQs, scripts — without hosting a page.
       security:
         - ApiKeyAuth: []
       parameters:
@@ -1274,6 +1324,10 @@ paths:
       responses:
         '201':
           description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseSourceResponse'
 
   /v1/phone-numbers/search:
     get:

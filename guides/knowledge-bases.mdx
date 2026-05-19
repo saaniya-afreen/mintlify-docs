@@ -1,17 +1,40 @@
 ---
 title: Knowledge bases
-description: Let your agent answer from your docs or pasted text.
+description: Index docs from URLs or text so your agent can answer from your content.
 ---
 
-## Before you start
+Knowledge bases let your agent **retrieve answers from your content** during calls — product docs, FAQs, policies, etc.
 
-**You need:** an `api_key` and an LLM model. Attach knowledge bases via `knowledge_base_ids` on the model.
+**Flow:** Create KB → add sources (URL or text) → attach `kb_id` to your LLM model → agent uses it on calls.
+
+---
+
+## All endpoints
+
+| Step | Method | Endpoint | What it does |
+| --- | --- | --- | --- |
+| 1 | `POST` | `/v1/knowledge-bases` | Create a knowledge base |
+| 2 | `POST` | `/v1/knowledge-bases/{kb_id}/sources` | Add a **URL** or **text** source |
+| 3 | `GET` | `/v1/knowledge-bases/{kb_id}/sources` | List sources in a KB |
+| 4 | `PATCH` | `/v1/models/{llm_id}` | Attach KB via `knowledge_base_ids` |
+| — | `GET` | `/v1/knowledge-bases` | List all knowledge bases |
+| — | `GET` | `/v1/knowledge-bases/{kb_id}` | Get one knowledge base |
+| — | `PATCH` | `/v1/knowledge-bases/{kb_id}` | Update name, chunk size, multilingual |
+| — | `DELETE` | `/v1/knowledge-bases/{kb_id}` | Delete KB and all sources |
 
 ---
 
 <Steps>
 
 <Step title="1. Create a knowledge base">
+
+**Goal:** Create an empty container for your content.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `name` | Yes | Label for your dashboard |
+| `chunk_size` | No | Split size for indexing. Default `512`. Smaller = more precise retrieval |
+| `multilingual` | No | Enable multilingual embeddings (e.g. EN + JA). Default `false` |
 
 ```bash
 curl -X POST http://13.207.23.185:8000/v1/knowledge-bases \
@@ -24,15 +47,35 @@ curl -X POST http://13.207.23.185:8000/v1/knowledge-bases \
   }'
 ```
 
+<ResponseExample>
+
+```json
+{
+  "id": "kb_abc123",
+  "name": "Product Docs",
+  "chunk_size": 512,
+  "multilingual": false,
+  "created_at": "2026-01-15T10:00:00Z"
+}
+```
+
+</ResponseExample>
+
 <Check>
-**Save:** response `id` as **`kb_id`**.
+**Save:** `"id"` as **`kb_id`**.
 </Check>
 
 </Step>
 
-<Step title="2. Add content">
+<Step title="2a. Add a URL source">
 
-**From a URL:**
+**Goal:** Index a public web page. OneInbox crawls the URL, chunks the content, and creates embeddings.
+
+**Requirements:**
+- URL must be **publicly accessible** (HTTPS)
+- Use for docs sites, FAQ pages, help centers
+
+**Replace** `<kb_id>` with your knowledge base ID.
 
 ```bash
 curl -X POST http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/sources \
@@ -44,7 +87,32 @@ curl -X POST http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/sources \
   }'
 ```
 
-**From plain text:**
+| Field | Value |
+| --- | --- |
+| `type` | `"url"` |
+| `source` | Full HTTPS URL to crawl |
+
+<ResponseExample>
+
+```json
+{
+  "id": "src_abc123",
+  "type": "url",
+  "source": "https://docs.example.com/faq",
+  "status": "processing",
+  "created_at": "2026-01-15T10:01:00Z"
+}
+```
+
+</ResponseExample>
+
+You can add **multiple URLs** to the same knowledge base — repeat this request with different `source` values.
+
+</Step>
+
+<Step title="2b. Add a text source (alternative)">
+
+**Goal:** Index raw text without hosting a webpage — policies, scripts, internal notes.
 
 ```bash
 curl -X POST http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/sources \
@@ -52,11 +120,20 @@ curl -X POST http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/sources \
   -H "Content-Type: application/json" \
   -d '{
     "type": "text",
-    "source": "Our return policy is 30 days, no questions asked."
+    "source": "Our return policy is 30 days, no questions asked. Shipping takes 3-5 business days."
   }'
 ```
 
-**List sources:**
+| Field | Value |
+| --- | --- |
+| `type` | `"text"` |
+| `source` | The raw text to index |
+
+</Step>
+
+<Step title="3. List sources (optional)">
+
+See everything indexed in a knowledge base:
 
 ```bash
 curl http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/sources \
@@ -65,7 +142,9 @@ curl http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/sources \
 
 </Step>
 
-<Step title="3. Attach to your LLM model">
+<Step title="4. Attach to your LLM model">
+
+**Goal:** Tell the agent's brain to search this KB during calls.
 
 ```bash
 curl -X PATCH http://13.207.23.185:8000/v1/models/<llm_id> \
@@ -76,12 +155,41 @@ curl -X PATCH http://13.207.23.185:8000/v1/models/<llm_id> \
   }'
 ```
 
+The agent linked to this `llm_id` will retrieve from the KB on the next call. No agent redeploy needed.
+
 </Step>
 
 </Steps>
 
 ---
 
+## Manage knowledge bases
+
+```bash
+# List all
+curl http://13.207.23.185:8000/v1/knowledge-bases \
+  -H "Authorization: Bearer <api_key>"
+
+# Get one
+curl http://13.207.23.185:8000/v1/knowledge-bases/<kb_id> \
+  -H "Authorization: Bearer <api_key>"
+
+# Update (rename, change chunk size)
+curl -X PATCH http://13.207.23.185:8000/v1/knowledge-bases/<kb_id> \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Product Docs v2",
+    "chunk_size": 1024
+  }'
+
+# Delete KB and all sources
+curl -X DELETE http://13.207.23.185:8000/v1/knowledge-bases/<kb_id> \
+  -H "Authorization: Bearer <api_key>"
+```
+
+---
+
 ## API reference
 
-[Create knowledge base](/api-reference/knowledge-bases/create-knowledge-base) · [Add source](/api-reference/knowledge-bases/add-knowledge-base-source) · [List sources](/api-reference/knowledge-bases/list-knowledge-base-sources)
+[Create KB](/api-reference/knowledge-bases/create-knowledge-base) · [Add source (URL or text)](/api-reference/knowledge-bases/add-knowledge-base-source) · [List sources](/api-reference/knowledge-bases/list-knowledge-base-sources) · [List KBs](/api-reference/knowledge-bases/list-knowledge-bases) · [Get KB](/api-reference/knowledge-bases/get-knowledge-base) · [Update KB](/api-reference/knowledge-bases/update-knowledge-base) · [Delete KB](/api-reference/knowledge-bases/delete-knowledge-base)
