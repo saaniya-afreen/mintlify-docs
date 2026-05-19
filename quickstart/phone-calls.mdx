@@ -1,24 +1,48 @@
 ---
 title: Phone calls
-description: Make outbound calls and set up inbound numbers with Twilio.
+description: Complete guide — outbound and inbound calls with Twilio.
 ---
 
-## Overview
+This guide shows how to call **real phone numbers** using Twilio. Do **[Build your first agent](/quickstart/first-agent)** first — you need a working `agent_id` and `api_key`.
 
-Phone calls use Twilio for telephony. You'll need a **Twilio integration** and a **phone number** before calling real phones.
-
-**Best for:**
-
-- Outbound sales and lead qualification
-- Inbound support lines
-- Appointment reminders
+**At the end:** your agent can dial someone's phone (outbound) and answer calls on a number you own (inbound).
 
 ---
 
-## Prerequisites
+## What you need
 
-- Completed **[Build your first agent](/quickstart/first-agent)**
-- A [Twilio account](https://www.twilio.com) with an Auth Token
+| Item | Where | Why |
+| --- | --- | --- |
+| `api_key` | From first-agent guide | Authenticates requests |
+| `agent_id` | From first-agent guide | Which agent talks on the call |
+| Twilio account | [twilio.com](https://www.twilio.com) | Phone network provider |
+| Twilio Auth Token | Twilio Console → Account → Auth Token | **Not** the Account SID |
+
+<Tip>
+**Finding your Twilio Auth Token:** Log into Twilio → **Account Dashboard** → scroll to **Auth Token** → click to reveal → copy it. This is what OneInbox stores as your Twilio integration.
+</Tip>
+
+---
+
+## Outbound vs inbound (simple)
+
+| Type | Who dials whom | What you set up |
+| --- | --- | --- |
+| **Outbound** | Your agent calls the customer | Step 4 only — `POST /v1/calls` with a phone number |
+| **Inbound** | Customer calls your number | Steps 2–3 — search + register a Twilio number linked to your agent |
+
+You can do outbound only, inbound only, or both.
+
+---
+
+## Your notepad
+
+```
+api_key: 
+agent_id: 
+twilio_integration_id: 
+registered_phone_number: (for inbound)
+```
 
 ---
 
@@ -26,7 +50,19 @@ Phone calls use Twilio for telephony. You'll need a **Twilio integration** and a
 
 <Step title="1. Add a Twilio integration">
 
-Store your Twilio Auth Token (not Account SID):
+### What you're doing
+
+Storing your Twilio Auth Token inside OneInbox — same idea as storing OpenAI in step 2 of the first guide.
+
+### Why?
+
+OneInbox uses **your** Twilio account to buy numbers and place calls. You pay Twilio directly for phone usage.
+
+---
+
+**Replace:**
+- `<api_key>` → your OneInbox key
+- `<your_twilio_auth_token>` → Twilio Auth Token (not Account SID)
 
 ```bash
 curl -X POST https://api.oneinbox.ai/v1/credentials \
@@ -39,22 +75,71 @@ curl -X POST https://api.oneinbox.ai/v1/credentials \
   }'
 ```
 
-Save the integration `id` as `twilio_integration_id`.
+**What success looks like:**
+
+<ResponseExample>
+
+```json
+{
+  "id": "cred_twilio_abc123",
+  "name": "Twilio Production",
+  "provider": "twilio"
+}
+```
+
+</ResponseExample>
+
+<Check>
+**Save:** `"id"` as **`twilio_integration_id`**. Some endpoints call this `credential_id` — same value.
+</Check>
 
 </Step>
 
-<Step title="2. Search for a phone number">
+<Step title="2. Search for an available phone number">
+
+### What you're doing
+
+Asking Twilio (through OneInbox) which phone numbers you can register in a country.
+
+### Skip this step?
+
+**Skip if you only want outbound calls** and don't need a dedicated inbound line. Jump to step 4.
+
+---
+
+**Replace** `<twilio_integration_id>` and `<api_key>`.
 
 ```bash
 curl "https://api.oneinbox.ai/v1/phone-numbers/search?country=US&limit=10&credential_id=<twilio_integration_id>" \
   -H "Authorization: Bearer <api_key>"
 ```
 
+**What success looks like:** a list of numbers like `+14155551234`. Pick one and copy it.
+
+| Query param | Meaning |
+| --- | --- |
+| `country` | Two-letter code: `US`, `GB`, `IN`, etc. |
+| `limit` | How many results to return |
+| `credential_id` | Your Twilio integration ID from step 1 |
+
 </Step>
 
-<Step title="3. Register the number">
+<Step title="3. Register the number for inbound calls">
 
-Assign your agent to handle inbound calls on that number:
+### What you're doing
+
+Telling OneInbox: "When someone calls **this number**, connect them to **this agent**."
+
+### What happens on inbound calls
+
+1. Someone dials your registered number
+2. OneInbox routes the call to your agent
+3. Agent speaks the `first_message` you set when creating the agent
+4. Conversation proceeds like the browser test
+
+---
+
+**Replace** all placeholders with your values.
 
 ```bash
 curl -X POST https://api.oneinbox.ai/v1/phone-numbers \
@@ -68,9 +153,27 @@ curl -X POST https://api.oneinbox.ai/v1/phone-numbers \
   }'
 ```
 
+<Check>
+**Save:** the phone number you registered. Call it from your mobile to test inbound.
+</Check>
+
 </Step>
 
 <Step title="4. Make an outbound call">
+
+### What you're doing
+
+Your agent **dials** a phone number and starts a conversation — like a sales or reminder call.
+
+### What happens
+
+1. OneInbox tells Twilio to dial the target number
+2. When the person answers, the agent says `first_message`
+3. They talk back and forth until someone says goodbye or timeout hits
+
+---
+
+**Replace** `<agent_id>`, `<api_key>`, and the target `phone_number` (must include country code, e.g. `+1...`).
 
 ```bash
 curl -X POST https://api.oneinbox.ai/v1/calls \
@@ -83,7 +186,28 @@ curl -X POST https://api.oneinbox.ai/v1/calls \
   }'
 ```
 
-Your agent dials the number and starts the conversation.
+**What success looks like:**
+
+<ResponseExample>
+
+```json
+{
+  "id": "call_xyz789",
+  "status": "queued",
+  "agent_id": "agent_abc123",
+  "phone_number": "+14155559876"
+}
+```
+
+</ResponseExample>
+
+<Check>
+**Save:** `"id"` as **`call_id`**. Check status and transcript with `GET /v1/calls/<call_id>`.
+</Check>
+
+<Info>
+**International calls:** Some destinations (e.g. Nepal) require enabling **International Outbound** in your Twilio console. If the call fails, check Twilio geo permissions.
+</Info>
 
 </Step>
 
@@ -91,17 +215,42 @@ Your agent dials the number and starts the conversation.
 
 ---
 
-## Inbound vs outbound
+## Verify an outbound call
 
-| Type | How it works |
-| --- | --- |
-| **Inbound** | Caller dials your registered number → agent answers with `first_message` |
-| **Outbound** | You call `POST /v1/calls` → agent dials the target number |
+```bash
+curl https://api.oneinbox.ai/v1/calls/<call_id> \
+  -H "Authorization: Bearer <api_key>"
+```
+
+Wait until `"status": "completed"`, then read the `transcript` array.
+
+---
+
+## Troubleshooting
+
+| Problem | Likely cause | Fix |
+| --- | --- | --- |
+| `401` | Wrong token | Use `api_key`, not JWT |
+| Call never connects | Invalid number format | Use E.164: `+14155551234` |
+| International call fails | Twilio geo restrictions | Enable outbound in Twilio console |
+| Inbound doesn't reach agent | Number not registered | Redo step 3 with correct `agent_id` |
+| Used Account SID instead of Auth Token | Wrong Twilio credential | Re-create integration with Auth Token |
 
 ---
 
 ## Next steps
 
-- **[Integrations](/concepts/integrations)** — all supported providers
-- **[Search phone numbers](/api-reference/phone-numbers/search-phone-numbers)** — search, register, update
-- **[Create outbound call](/api-reference/calls/create-outbound-call)** — outbound call options
+<CardGroup cols={2}>
+  <Card title="Integrations" icon="key" href="/concepts/integrations">
+    All supported providers
+  </Card>
+  <Card title="Agents" icon="robot" href="/concepts/agents">
+    Tune greeting, voice, and timeouts
+  </Card>
+  <Card title="Webhooks" icon="webhook" href="/guides/webhooks">
+    Get notified when calls complete
+  </Card>
+  <Card title="API reference" icon="code" href="/api-reference/calls/create-outbound-call">
+    Full outbound call options
+  </Card>
+</CardGroup>

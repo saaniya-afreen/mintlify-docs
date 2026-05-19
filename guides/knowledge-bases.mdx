@@ -1,0 +1,87 @@
+---
+title: Knowledge bases
+description: Let your agent answer from your docs or pasted text.
+---
+
+## Before you start
+
+**You need:** an `api_key` and an LLM model. Attach knowledge bases via `knowledge_base_ids` on the model.
+
+---
+
+<Steps>
+
+<Step title="1. Create a knowledge base">
+
+```bash
+curl -X POST https://api.oneinbox.ai/v1/knowledge-bases \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Product Docs",
+    "chunk_size": 512,
+    "multilingual": false
+  }'
+```
+
+<Check>
+**Save:** response `id` as **`kb_id`**.
+</Check>
+
+</Step>
+
+<Step title="2. Add content">
+
+**From a URL:**
+
+```bash
+curl -X POST https://api.oneinbox.ai/v1/knowledge-bases/<kb_id>/sources \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "url",
+    "source": "https://docs.example.com/faq"
+  }'
+```
+
+**From plain text:**
+
+```bash
+curl -X POST https://api.oneinbox.ai/v1/knowledge-bases/<kb_id>/sources \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "text",
+    "source": "Our return policy is 30 days, no questions asked."
+  }'
+```
+
+**List sources:**
+
+```bash
+curl https://api.oneinbox.ai/v1/knowledge-bases/<kb_id>/sources \
+  -H "Authorization: Bearer <api_key>"
+```
+
+</Step>
+
+<Step title="3. Attach to your LLM model">
+
+```bash
+curl -X PATCH https://api.oneinbox.ai/v1/models/<llm_id> \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "knowledge_base_ids": ["<kb_id>"]
+  }'
+```
+
+</Step>
+
+</Steps>
+
+---
+
+## API reference
+
+[Create knowledge base](/api-reference/knowledge-bases/create-knowledge-base) · [List knowledge bases](/api-reference/knowledge-bases/list-knowledge-bases)

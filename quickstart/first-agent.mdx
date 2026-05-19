@@ -1,53 +1,91 @@
 ---
 title: Build your first agent
-description: Create an API key, connect OpenAI, and make a browser call in 5 minutes.
+description: Step-by-step guide from sign-up to your first browser test call.
 ---
 
-## Overview
+Follow each step in order. At the end you'll talk to your voice agent in the browser.
 
-In this quickstart you'll create a working voice agent and talk to it in your browser. No phone number required.
-
-**You'll:**
-
-- Create a OneInbox account and API key
-- Store your OpenAI key as an **Integration**
-- Define an **LLM model** (the brain)
-- Assemble an **Agent** (STT + LLM + TTS)
-- Test your agent in the **browser** (dev/demo via meet link)
-
-**Time:** ~5 minutes
+**Time:** ~15 minutes
 
 ---
 
-## Prerequisites
+## What you need before step 1
 
-- An [OpenAI API key](https://platform.openai.com) (for the LLM)
-- Terminal with `curl`, or [Postman](https://www.postman.com/)
-
-You do **not** need Twilio or ElevenLabs for this guide.
-
----
-
-## Before you start: two tokens
-
-OneInbox uses two tokens. This trips up almost every new developer:
-
-| Token | When you get it | Use it for |
+| Item | Where to get it | Used in |
 | --- | --- | --- |
-| `access_token` (JWT) | Sign up / log in | Creating your API key **only** |
-| `api_key` | After step 1 below | **Everything else** — agents, calls, integrations |
+| **OpenAI API key** | [platform.openai.com](https://platform.openai.com) → API keys → Create | Step 2 |
+| **Terminal or Postman** | Mac: Terminal app. Windows: PowerShell or [Postman](https://www.postman.com/) | Every step |
+| **Your email** | Any work or personal email | Step 1 sign-up |
 
-After step 1, forget the JWT. Use `api_key` for all remaining steps.
+You do **not** need: Twilio, a phone number, ElevenLabs, or a credit card on OneInbox for this guide.
+
+<Tip>
+**How to get an OpenAI key:** Log into OpenAI → click your profile → **API keys** → **Create new secret key** → copy it (starts with `sk-`). You won't see it again.
+</Tip>
+
+---
+
+## How to use this guide
+
+Every command has **placeholders** in angle brackets. Replace them with your real values before running:
+
+| Placeholder | Replace with |
+| --- | --- |
+| `<access_token>` | JWT from sign-up (step 1a) |
+| `<api_key>` | Your OneInbox key (step 1b) — starts with `oi_live_` |
+| `<your_openai_api_key>` | Your OpenAI key — starts with `sk-` |
+| `<llm_id>` | ID from step 3 |
+| `<agent_id>` | ID from step 4 |
+| `<call_id>` | ID from step 5 |
+
+**Keep a notepad** (or use this template) and fill in values as you go:
+
+```
+access_token: 
+api_key: 
+llm_id: 
+agent_id: 
+call_id: 
+meet_url: 
+```
+
+---
+
+## Two tokens — the #1 mistake new users make
+
+OneInbox gives you **two different tokens**. They are not interchangeable.
+
+| Token | Looks like | When you get it | Use it for |
+| --- | --- | --- | --- |
+| `access_token` (JWT) | Long string starting with `eyJ...` | Sign-up or login | **Only** creating your API key |
+| `api_key` | Starts with `oi_live_...` | After creating API key | **Everything** from step 2 onward |
+
+<Warning>
+If step 2 or later returns **`401 Unauthorized`**, you are almost certainly using the JWT instead of `api_key`. Go back to step 1b and copy `api_key` again.
+</Warning>
+
+More detail → [Authentication](/concepts/authentication)
 
 ---
 
 <Steps>
 
-<Step title="1. Create your API key">
+<Step title="1. Create your OneInbox account and API key">
 
-**Why:** Your API key is how OneInbox knows requests are coming from you.
+### What you're doing
 
-**Sign up** — returns a JWT you'll use once:
+You're creating a OneInbox account, then generating an **API key** — your permanent credential for all future requests.
+
+### Why two requests?
+
+- **Sign-up** creates your user and gives a temporary login token (JWT)
+- **Create API key** turns that into the long-lived `api_key` you'll use everywhere else
+
+---
+
+### Step 1a — Sign up
+
+**Replace** the email, password, name, and company with your details.
 
 ```bash
 curl -X POST https://api.oneinbox.ai/v1/auth/signup \
@@ -60,9 +98,42 @@ curl -X POST https://api.oneinbox.ai/v1/auth/signup \
   }'
 ```
 
-Copy `access_token` from the response.
+**What success looks like** (HTTP `201`):
 
-**Create an API key** — use the JWT from above:
+<ResponseExample>
+
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer",
+  "user": {
+    "id": "user_abc123",
+    "email": "you@yourcompany.com",
+    "name": "Your Name"
+  }
+}
+```
+
+</ResponseExample>
+
+<Check>
+**Copy and save:** `access_token` — you'll paste it into step 1b **once**, then never use it again for resource calls.
+</Check>
+
+**Already have an account?** Use [Log in](/api-reference/auth/log-in) instead of sign-up. You'll get the same `access_token` shape.
+
+**Common errors:**
+
+| Error | Meaning | Fix |
+| --- | --- | --- |
+| `409` / email exists | Account already created | Use login instead |
+| `422` | Missing or invalid field | Check email format and password length |
+
+---
+
+### Step 1b — Create your API key
+
+**Replace** `<access_token>` with the value from step 1a.
 
 ```bash
 curl -X POST https://api.oneinbox.ai/v1/api-keys \
@@ -71,33 +142,50 @@ curl -X POST https://api.oneinbox.ai/v1/api-keys \
   -d '{ "name": "My First Key" }'
 ```
 
+**What success looks like** (HTTP `201`):
+
 <ResponseExample>
 
 ```json
 {
   "id": "key_abc123",
   "name": "My First Key",
-  "api_key": "oi_live_xxxxxxxxxxxxxxxxxxxx"
+  "api_key": "oi_live_xxxxxxxxxxxxxxxxxxxx",
+  "created_at": "2026-01-15T10:00:00Z"
 }
 ```
 
 </ResponseExample>
 
 <Warning>
-Copy `api_key` now — it is shown **once**. All steps below use:
-
-```
-Authorization: Bearer <api_key>
-```
+**Copy `api_key` now.** OneInbox shows it **only once**. If you lose it, create a new key with the same curl (using a fresh JWT from login).
 </Warning>
+
+<Check>
+**Save:** `api_key` → use `Authorization: Bearer <api_key>` in **every step from here on**.
+</Check>
 
 </Step>
 
-<Step title="2. Add an OpenAI integration">
+<Step title="2. Connect OpenAI (create an Integration)">
 
-**Why:** OneInbox needs your OpenAI key to run the LLM. We encrypt it and never echo it back.
+### What you're doing
 
-**What you're creating:** An **Integration** — your stored OpenAI credentials.
+You're giving OneInbox permission to use **your** OpenAI account when your agent needs to think.
+
+### Why?
+
+OneInbox doesn't use a shared OpenAI key. You bring your own. We encrypt it and store it — the raw key is **never** returned in API responses after this step.
+
+### What is an Integration?
+
+An **Integration** is a stored third-party API key. In the API it's called `/v1/credentials`, but we say "Integration" in docs because that's what it represents.
+
+---
+
+**Replace:**
+- `<api_key>` → your OneInbox key from step 1
+- `<your_openai_api_key>` → your OpenAI key (`sk-...`)
 
 ```bash
 curl -X POST https://api.oneinbox.ai/v1/credentials \
@@ -110,27 +198,63 @@ curl -X POST https://api.oneinbox.ai/v1/credentials \
   }'
 ```
 
+**What success looks like** (HTTP `201`):
+
 <ResponseExample>
 
 ```json
 {
   "id": "cred_openai_abc123",
   "name": "OpenAI",
-  "provider": "openai"
+  "provider": "openai",
+  "created_at": "2026-01-15T10:01:00Z"
 }
 ```
 
 </ResponseExample>
 
-Save `id` — you may reference it as `credential_id` in other resources.
+Notice there is **no** OpenAI key in the response — that's intentional.
+
+<Check>
+**Save (optional):** `id` as `credential_id`. For this basic guide, step 3 uses `"provider": "openai"` and OneInbox finds your stored key automatically.
+</Check>
+
+**Common errors:**
+
+| Error | Meaning | Fix |
+| --- | --- | --- |
+| `401` | Wrong auth token | Use `api_key`, not JWT |
+| `400` | Invalid provider or key | Check `"provider": "openai"` and your `sk-` key |
 
 </Step>
 
-<Step title="3. Create an LLM model">
+<Step title="3. Create an LLM model (the brain)">
 
-**Why:** The LLM model is the brain — it reads what the user said and decides what to reply.
+### What you're doing
 
-**What you're creating:** A reusable **LLM model** with a system prompt and model name.
+You're defining **how your agent thinks** — which GPT model to use and what instructions it follows.
+
+### Why?
+
+The **Agent** (step 4) doesn't contain the prompt directly. It points to an **LLM model** via `llm_id`. This lets you reuse the same brain across agents or update prompts without rebuilding the whole agent.
+
+### Fields explained
+
+| Field | What it means | Example in this guide |
+| --- | --- | --- |
+| `name` | Label for your dashboard | `"My First Model"` |
+| `provider` | Which AI company | `"openai"` |
+| `model` | Which model version | `"gpt-4o-mini"` (fast + cheap for testing) |
+| `system_prompt` | Instructions the agent always follows | Personality, tone, rules |
+| `temperature` | Creativity (0 = strict, 1 = creative) | `0.7` |
+| `tool_ids` | Actions the agent can take | `[]` empty for now |
+| `knowledge_base_ids` | Docs to search | `[]` empty for now |
+
+Feel free to change the `system_prompt` to match your use case — e.g. "You are a pizza shop order taker..."
+
+---
+
+**Replace** `<api_key>` with your OneInbox key.
 
 ```bash
 curl -X POST https://api.oneinbox.ai/v1/models \
@@ -148,15 +272,66 @@ curl -X POST https://api.oneinbox.ai/v1/models \
   }'
 ```
 
-Save the response `id` as **`llm_id`**.
+**What success looks like** (HTTP `201`):
+
+<ResponseExample>
+
+```json
+{
+  "id": "model_abc123",
+  "name": "My First Model",
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "system_prompt": "You are Alex, a friendly assistant...",
+  "temperature": 0.7,
+  "created_at": "2026-01-15T10:02:00Z"
+}
+```
+
+</ResponseExample>
+
+<Check>
+**Save:** the `"id"` field as **`llm_id`**. You **must** paste this into step 4.
+</Check>
+
+**Common errors:**
+
+| Error | Meaning | Fix |
+| --- | --- | --- |
+| `401` | Bad API key | Re-check `api_key` from step 1 |
+| `402` / OpenAI error | OpenAI billing or key issue | Check OpenAI dashboard has credits |
 
 </Step>
 
-<Step title="4. Create an agent">
+<Step title="4. Create an Agent (listen + think + speak)">
 
-**Why:** An agent wires the LLM to ears (STT) and a voice (TTS), plus call behavior like the opening line.
+### What you're doing
 
-**What you're creating:** A complete **Agent** ready to take calls.
+You're assembling the full **voice agent** — the thing that actually takes calls.
+
+An agent combines:
+
+| Part | Config field | What it does in this guide |
+| --- | --- | --- |
+| **Brain** | `llm_id` | Links to step 3 |
+| **Ears (STT)** | `transcriber` | Deepgram listens to your speech |
+| **Voice (TTS)** | `tts` | Deepgram speaks replies (voice: asteria) |
+| **Behavior** | `first_message`, timeouts | What Alex says first, when to hang up |
+
+### Behavior fields explained
+
+| Field | What it does |
+| --- | --- |
+| `first_message` | First thing the agent says when the call connects |
+| `end_call_phrases` | If the **user** says these words, the call ends |
+| `silence_timeout_seconds` | Hang up after this many seconds of silence |
+| `max_duration_seconds` | Hard limit on call length (600 = 10 minutes) |
+
+---
+
+**Replace:**
+- `<api_key>` → your OneInbox key
+- `<llm_id>` → ID from step 3
 
 ```bash
 curl -X POST https://api.oneinbox.ai/v1/agents \
@@ -183,17 +358,61 @@ curl -X POST https://api.oneinbox.ai/v1/agents \
   }'
 ```
 
-Save the response `id` as **`agent_id`**.
+**What success looks like** (HTTP `201`):
+
+<ResponseExample>
+
+```json
+{
+  "id": "agent_abc123",
+  "name": "Alex",
+  "llm_id": "model_abc123",
+  "transcriber": { "provider": "deepgram", "model": "nova-3", "language": "en" },
+  "tts": { "provider": "deepgram", "voice_id": "asteria" },
+  "first_message": "Hi! I am Alex. How can I help you today?",
+  "created_at": "2026-01-15T10:03:00Z"
+}
+```
+
+</ResponseExample>
+
+<Check>
+**Save:** the `"id"` field as **`agent_id`**. You need it for step 5.
+</Check>
+
+**Common errors:**
+
+| Error | Meaning | Fix |
+| --- | --- | --- |
+| `404` on llm_id | Wrong or missing LLM ID | Re-copy `id` from step 3 |
+| `400` | Invalid transcriber/tts config | Use the exact JSON above for first test |
 
 </Step>
 
-<Step title="5. Test in the browser (dev)">
+<Step title="5. Start a browser test call">
 
-**Why:** Hear your agent before wiring up phone numbers. This opens a **meet link** for testing — not an embeddable widget for your site.
+### What you're doing
 
-<Info>
-Browser test calls are for **development and demos**. Production voice today is **phone calls** via Twilio. See [Phone calls](/quickstart/phone-calls).
-</Info>
+You're starting a **live conversation** with your agent. OneInbox returns a link — you open it in Chrome or Safari, allow your microphone, and talk.
+
+### Is this production?
+
+**No.** Browser test calls are for **development and demos**. For real phone calls to customers, see [Phone calls](/quickstart/phone-calls) after this guide.
+
+### What you'll experience
+
+1. You run the curl below
+2. You get a `participant_token` and `server_url`
+3. You open a meet link in your browser
+4. Alex says the `first_message` from step 4
+5. You speak — Alex replies
+6. Say **"goodbye"** to end (matches `end_call_phrases`)
+
+---
+
+**Replace:**
+- `<api_key>` → your OneInbox key
+- `<agent_id>` → ID from step 4
 
 ```bash
 curl -X POST https://api.oneinbox.ai/v1/calls/web \
@@ -205,25 +424,52 @@ curl -X POST https://api.oneinbox.ai/v1/calls/web \
   }'
 ```
 
+**What success looks like** (HTTP `201`):
+
 <ResponseExample>
 
 ```json
 {
-  "id": "<call_id>",
-  "server_url": "wss://...",
-  "participant_token": "eyJhbGci..."
+  "id": "call_abc123",
+  "status": "queued",
+  "server_url": "wss://livekit.example.com",
+  "participant_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
 
 </ResponseExample>
 
-**Open in your browser:**
+### Open the meet link
+
+Build this URL by swapping in your values (keep the `wss://` prefix on `server_url` as-is):
 
 ```
 https://meet.oneinbox.ai?token=<participant_token>&server=<server_url>
 ```
 
-Allow microphone access. Alex speaks within a few seconds. Say **"goodbye"** to end.
+**Example** (yours will differ):
+
+```
+https://meet.oneinbox.ai?token=eyJhbGci...&server=wss://livekit.example.com
+```
+
+Paste the full URL into your browser address bar and press Enter.
+
+<Tip>
+**Browser tips:** Use Chrome or Safari. Click **Allow** when asked for microphone access. Use headphones to avoid echo.
+</Tip>
+
+<Check>
+**Save:** `"id"` as **`call_id`** for the verify step below.
+</Check>
+
+**Common errors:**
+
+| Error | Meaning | Fix |
+| --- | --- | --- |
+| `404` on agent_id | Wrong agent ID | Re-copy from step 4 |
+| Meet page loads but no audio | Mic blocked | Check browser permissions |
+| Agent doesn't speak | Wait 5–10 seconds | First connection can take a moment |
 
 </Step>
 
@@ -231,16 +477,73 @@ Allow microphone access. Alex speaks within a few seconds. Say **"goodbye"** to 
 
 ---
 
-## Verify it worked
+## Verify your call worked
 
-After the call ends, fetch the transcript:
+After you say goodbye and the call ends, fetch the call record:
+
+**Replace** `<call_id>` and `<api_key>` with your values.
 
 ```bash
 curl https://api.oneinbox.ai/v1/calls/<call_id> \
   -H "Authorization: Bearer <api_key>"
 ```
 
-You should see `status: "completed"` and a full transcript.
+**What to look for:**
+
+<ResponseExample>
+
+```json
+{
+  "id": "call_abc123",
+  "status": "completed",
+  "agent_id": "agent_abc123",
+  "transcript": [
+    { "role": "assistant", "content": "Hi! I am Alex. How can I help you today?" },
+    { "role": "user", "content": "What's the weather like?" },
+    { "role": "assistant", "content": "I don't have weather data, but I'm happy to help with something else!" }
+  ],
+  "duration_seconds": 42
+}
+```
+
+</ResponseExample>
+
+If `status` is `"completed"` and you see a `transcript` array — **you're done.** You built a working voice agent.
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="401 Unauthorized on any step after step 1">
+    You're using the JWT (`eyJ...`) instead of your API key (`oi_live_...`). Create a new API key if you lost it: log in → `POST /v1/api-keys` with the JWT.
+  </Accordion>
+  <Accordion title="OpenAI errors during the call">
+    Check your OpenAI account has billing enabled and the key in step 2 is valid. Test the key at platform.openai.com.
+  </Accordion>
+  <Accordion title="curl: command not found">
+    Install curl or use [Postman](https://www.postman.com/) instead. Import our collection and run requests in the same order.
+  </Accordion>
+  <Accordion title="JSON parse error from curl">
+    Make sure quotes in `-d '{ ... }'` are straight quotes, not curly “smart quotes” from Word or Notes.
+  </Accordion>
+  <Accordion title="Agent works in browser but I want phone calls">
+    Complete [Phone calls](/quickstart/phone-calls) next — you'll add Twilio and dial real numbers.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## What you built (recap)
+
+```
+You created:
+  api_key     → authenticates you
+  integration → stores OpenAI key
+  llm_id      → brain + personality
+  agent_id    → full voice agent
+  call        → live conversation + transcript
+```
 
 ---
 
@@ -248,15 +551,15 @@ You should see `status: "completed"` and a full transcript.
 
 <CardGroup cols={2}>
   <Card title="Phone calls" icon="phone" href="/quickstart/phone-calls">
-    Outbound and inbound with real numbers
+    Outbound and inbound with Twilio
   </Card>
-  <Card title="Integrations" icon="key" href="/concepts/integrations">
-    Add Twilio, ElevenLabs, Gemini
+  <Card title="Change the prompt" icon="pen" href="/api-reference/llm-models/update-llm-model">
+    Update your LLM model — agent picks it up automatically
   </Card>
-  <Card title="Agents" icon="robot" href="/concepts/agents">
-    Tune STT, TTS, and behavior
+  <Card title="Add tools" icon="wrench" href="/guides/tools">
+    Let Alex call your APIs or transfer calls
   </Card>
-  <Card title="API reference" icon="code" href="/api-reference/calls/start-browser-test-call">
-    Call endpoints
+  <Card title="Webhooks" icon="webhook" href="/guides/webhooks">
+    Get call events on your server
   </Card>
 </CardGroup>

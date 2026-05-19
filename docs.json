@@ -52,6 +52,15 @@
                 ]
               },
               {
+                "group": "Guides",
+                "pages": [
+                  "guides/tools",
+                  "guides/webhooks",
+                  "guides/knowledge-bases",
+                  "guides/voices"
+                ]
+              },
+              {
                 "group": "Core concepts",
                 "pages": [
                   "concepts/how-it-works",

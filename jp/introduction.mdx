@@ -1,53 +1,42 @@
 ---
 title: はじめに
-description: OneInbox とは何か、音声 AI エージェントの始め方。
+description: 5つのAPI呼び出しで音声AIエージェントを構築。
 ---
 
-OneInbox は **音声 AI エージェント**を構築するための開発者向けプラットフォームです。会話ロジックを定義していただければ、テレフォニー・ストリーミング・スケーリングは弊社が担当します。
+OneInbox は **音声 AI エージェント**用の REST API です。エージェントを作成し、電話またはブラウザでテストできます。
 
-音声エージェントでできること:
-
-- **電話の発信・着信**（アウトバウンド営業、インバウンドサポート）
-- **開発時のブラウザテスト**（meet リンク — アプリ埋め込みは未対応）
-- ツール経由で **API・CRM・ナレッジベース**と連携
+**初めての方は** [クイックスタート](/jp/quickstart/first-agent) から — 各 curl をコピーし、ID を保存して次のステップへ。
 
 ---
 
-## 本番 vs 開発
+## 5つのステップ（順番通り）
 
-| チャネル | 状態 | 用途 |
+| ステップ | 内容 | 保存する ID |
 | --- | --- | --- |
-| **アウトバウンド電話** | 利用可能 | 営業、リマインダー |
-| **インバウンド電話** | 利用可能 | Twilio 番号でのサポート |
-| **ブラウザテスト** | 利用可能 | 開発・デモのみ |
-| **アプリ/Web 埋め込み** | 未対応 | 今後対応予定 |
+| 1 | サインアップ + API キー | `api_key` |
+| 2 | OpenAI キーを保存 | `credential_id` |
+| 3 | LLM モデル（プロンプト） | `llm_id` |
+| 4 | エージェント（STT + LLM + TTS） | `agent_id` |
+| 5 | ブラウザテスト通話 | meet リンクを開く |
+
+<Info>
+ドキュメントでは **インテグレーション** と表記。API パスは `/v1/credentials` です。
+</Info>
 
 ---
 
 ## パスを選ぶ
 
 <CardGroup cols={2}>
-  <Card title="最初のエージェントを作る" icon="rocket" href="/jp/quickstart/first-agent">
-    **ここから開始。** APIキー作成、OpenAI接続、ブラウザでテストまで約5分。
+  <Card title="最初のエージェント" icon="rocket" href="/jp/quickstart/first-agent">
+    約5分。ブラウザでテストまで。
   </Card>
   <Card title="電話通話" icon="phone" href="/quickstart/phone-calls">
-    Twilio を使った発信・着信
+    Twilio で発信・着信
   </Card>
   <Card title="API リファレンス" icon="code" href="/api-reference/auth/sign-up">
-    インタラクティブな API リファレンス
+    全エンドポイント（Try It 対応）
   </Card>
 </CardGroup>
-
----
-
-## 最初に作る5つのリソース
-
-```
-APIキー → インテグレーション → LLMモデル → エージェント → 通話
-```
-
-<Info>
-ドキュメントでは **インテグレーション** と表記します。API パスは `/v1/credentials` です。
-</Info>
 
 → **[最初のエージェントを作る](/jp/quickstart/first-agent)**

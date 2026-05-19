@@ -1,0 +1,71 @@
+---
+title: Voices
+description: List built-in voices or import custom ones from ElevenLabs.
+---
+
+## Before you start
+
+**Built-in voices** (Deepgram, etc.) work out of the box — set `tts.voice_id` when you [create an agent](/quickstart/first-agent).
+
+**Custom voices** need an integration for the provider (e.g. ElevenLabs) first.
+
+---
+
+<Steps>
+
+<Step title="1. List available voices">
+
+```bash
+# All voices
+curl https://api.oneinbox.ai/v1/voices \
+  -H "Authorization: Bearer <api_key>"
+
+# Filter by provider
+curl "https://api.oneinbox.ai/v1/voices?provider=cartesia" \
+  -H "Authorization: Bearer <api_key>"
+```
+
+Pick a `voice_id` and use it in your agent's `tts` block.
+
+</Step>
+
+<Step title="2. Import a custom voice (optional)">
+
+**Goal:** Clone or import a voice from ElevenLabs (or another provider).
+
+First, [add an ElevenLabs integration](/concepts/integrations). Then:
+
+```bash
+curl -X POST https://api.oneinbox.ai/v1/voices/import \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "provider": "elevenlabs",
+    "provider_voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "name": "Rachel (cloned)",
+    "credential_id": "<credential_id>",
+    "gender": "female",
+    "language": "en",
+    "accent": "American"
+  }'
+```
+
+<Check>
+**Save:** response `id` as **`voice_id`** — use it in `tts.voice_id` on your agent.
+</Check>
+
+</Step>
+
+<Step title="3. Override voice on a single call (optional)">
+
+When starting a browser test call, you can override TTS without changing the agent — see [Start browser test call](/api-reference/calls/start-browser-test-call) for override fields (Cartesia, ElevenLabs, Deepgram examples in Postman).
+
+</Step>
+
+</Steps>
+
+---
+
+## API reference
+
+[List voices](/api-reference/voices/list-voices) · [Import voice](/api-reference/voices/import-voice)

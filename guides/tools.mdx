@@ -1,0 +1,119 @@
+---
+title: Tools
+description: Give your agent actions — call APIs, transfer, or end the call.
+---
+
+## Before you start
+
+**You need:** an `api_key` and an LLM model. Attach tools via `tool_ids` when you create or update a model.
+
+**Tool types in the API:**
+
+| Type | What it does |
+| --- | --- |
+| `api_call` | Agent calls your HTTP endpoint |
+| `transfer_call` | Transfer to a human phone number |
+| `end_call` | Agent hangs up |
+
+---
+
+<Steps>
+
+<Step title="1. Create a tool">
+
+**Example — call your API:**
+
+```bash
+curl -X POST https://api.oneinbox.ai/v1/tools \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "get_weather",
+    "type": "api_call",
+    "description": "Look up current weather for a city.",
+    "url": "https://api.weather.com/v1/current",
+    "method": "GET",
+    "headers": {"Authorization": "Bearer <secret>"},
+    "parameters": [
+      {"name": "city", "type": "string", "required": true, "description": "City name"}
+    ]
+  }'
+```
+
+<Check>
+**Save:** response `id` as **`tool_id`**.
+</Check>
+
+**Transfer to a human:**
+
+```bash
+curl -X POST https://api.oneinbox.ai/v1/tools \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "transfer_to_human",
+    "type": "transfer_call",
+    "description": "Escalate to a human agent.",
+    "transfer_to": "+15105550100"
+  }'
+```
+
+**End the call:**
+
+```bash
+curl -X POST https://api.oneinbox.ai/v1/tools \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "hangup",
+    "type": "end_call",
+    "description": "End the call."
+  }'
+```
+
+</Step>
+
+<Step title="2. Attach tools to your LLM model">
+
+**Goal:** The agent can use the tools during calls.
+
+Update your model (or set `tool_ids` when creating it):
+
+```bash
+curl -X PATCH https://api.oneinbox.ai/v1/models/<llm_id> \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tool_ids": ["<tool_id>"]
+  }'
+```
+
+Your agent already linked to this `llm_id` picks up the change automatically.
+
+</Step>
+
+<Step title="3. List or manage tools">
+
+```bash
+# List all
+curl https://api.oneinbox.ai/v1/tools \
+  -H "Authorization: Bearer <api_key>"
+
+# Get one
+curl https://api.oneinbox.ai/v1/tools/<tool_id> \
+  -H "Authorization: Bearer <api_key>"
+
+# Delete
+curl -X DELETE https://api.oneinbox.ai/v1/tools/<tool_id> \
+  -H "Authorization: Bearer <api_key>"
+```
+
+</Step>
+
+</Steps>
+
+---
+
+## API reference
+
+[Create tool](/api-reference/tools/create-tool) · [List tools](/api-reference/tools/list-tools) · [Update tool](/api-reference/tools/update-tool)

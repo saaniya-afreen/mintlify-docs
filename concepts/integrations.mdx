@@ -1,36 +1,42 @@
 ---
 title: Integrations
-description: Store third-party API keys securely — OpenAI, Twilio, ElevenLabs, and more.
+description: How to store OpenAI, Twilio, and other provider keys in OneInbox.
 ---
 
 ## What is an integration?
 
-An **Integration** is a securely stored API key for an external provider. OneInbox uses it on your behalf when running calls.
+An **integration** is a third-party API key stored securely inside OneInbox.
 
-- Encrypted at rest
-- Never returned in API responses
-- Referenced by `id` in other resources
+**Real-world analogy:** You're giving OneInbox a copy of your house key (OpenAI, Twilio, etc.) so it can use that service on your behalf during calls — without you sending the key on every request.
+
+- OneInbox **encrypts** the key at rest
+- The raw key is **never** returned after you create the integration
+- You reference integrations by their `id` in other API calls
 
 <Info>
-Docs call these **Integrations**. The API path is `/v1/credentials`. Some fields use `credential_id` — same ID.
+**Docs say "Integration".** The API path is `/v1/credentials`. Some fields say `credential_id` — same ID.
 </Info>
 
 ---
 
-## Supported providers
+## When do you need one?
 
-| Provider | `provider` value | Used for |
-| --- | --- | --- |
-| OpenAI | `openai` | LLM (GPT-4o, GPT-4o-mini, …) |
-| Google Gemini | `gemini` | LLM |
-| ElevenLabs | `elevenlabs` | Custom / cloned voices |
-| Cartesia | `cartesia` | Custom voices |
-| Deepgram | `deepgram` | Custom voice or transcriber |
-| Twilio | `twilio` | Phone numbers, outbound calls |
+| Provider | You need it when… |
+| --- | --- |
+| **OpenAI** | Your agent uses GPT (required for first-agent guide) |
+| **Twilio** | You want phone calls (outbound or inbound) |
+| **ElevenLabs** | You want to import a custom/cloned voice |
+| **Gemini** | You want Google's models instead of OpenAI |
+
+For the basic browser test, you only need **OpenAI**.
 
 ---
 
-## Create an integration
+## How to create one
+
+**Step 1:** Get your provider's API key (e.g. `sk-...` from OpenAI).
+
+**Step 2:** POST to OneInbox with your OneInbox `api_key`:
 
 ```bash
 curl -X POST https://api.oneinbox.ai/v1/credentials \
@@ -43,26 +49,68 @@ curl -X POST https://api.oneinbox.ai/v1/credentials \
   }'
 ```
 
-**Twilio:** set `api_key` to your Twilio **Auth Token** (not Account SID).
+**Step 3:** Save the `"id"` from the response — that's your integration ID.
 
 ---
 
-## How integrations connect
+## Supported providers
+
+| Provider | `provider` value | Key to paste | Used for |
+| --- | --- | --- | --- |
+| OpenAI | `openai` | OpenAI API key (`sk-...`) | LLM (GPT) |
+| Google Gemini | `gemini` | Gemini API key | LLM |
+| Twilio | `twilio` | **Auth Token** (not Account SID) | Phone numbers + calls |
+| ElevenLabs | `elevenlabs` | ElevenLabs API key | Custom voices |
+| Cartesia | `cartesia` | Cartesia API key | Custom voices |
+| Deepgram | `deepgram` | Deepgram API key | Optional custom STT/TTS |
+
+<Warning>
+**Twilio:** Use your **Auth Token**, not your Account SID. Find it in Twilio Console → Account → Auth Token.
+</Warning>
+
+---
+
+## How integrations connect to other resources
 
 ```
-You store:     { provider: "openai", api_key: "sk-..." }
-                              │
-               OneInbox encrypts and stores
-                              │
-You receive:   { id: "cred_abc123" }
-                              │
-You reference: credential_id in voices, phone search, etc.
+You create:     Integration (OpenAI)
+                      │
+                      ▼
+You create:     LLM model with "provider": "openai"
+                      │
+                      ▼
+OneInbox uses:  Your stored OpenAI key automatically
+```
+
+For Twilio:
+
+```
+Integration (Twilio)  →  credential_id on phone number search/register
+Integration (Twilio)  →  used when placing outbound calls
+```
+
+---
+
+## Manage integrations
+
+```bash
+# List all
+curl https://api.oneinbox.ai/v1/credentials \
+  -H "Authorization: Bearer <api_key>"
+
+# Get one
+curl https://api.oneinbox.ai/v1/credentials/<credential_id> \
+  -H "Authorization: Bearer <api_key>"
+
+# Delete
+curl -X DELETE https://api.oneinbox.ai/v1/credentials/<credential_id> \
+  -H "Authorization: Bearer <api_key>"
 ```
 
 ---
 
 ## Next steps
 
-- **[Build your first agent](/quickstart/first-agent)** — add OpenAI integration
+- **[Build your first agent](/quickstart/first-agent)** — add OpenAI integration (step 2)
 - **[Phone calls](/quickstart/phone-calls)** — add Twilio integration
-- **[Create integration](/api-reference/integrations/create-integration)** — CRUD endpoints
+- **[Create integration](/api-reference/integrations/create-integration)** — API reference

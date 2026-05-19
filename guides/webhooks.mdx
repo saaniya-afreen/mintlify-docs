@@ -1,0 +1,82 @@
+---
+title: Webhooks
+description: Receive call events on your server.
+---
+
+## Before you start
+
+**You need:** an `api_key` and a public HTTPS URL that accepts POST requests.
+
+**Common events:**
+
+| Event | When |
+| --- | --- |
+| `call.started` | Call connects |
+| `call.ended` | Call finishes |
+| `transcript.final` | Full transcript ready |
+
+---
+
+<Steps>
+
+<Step title="1. Create a webhook">
+
+```bash
+curl -X POST https://api.oneinbox.ai/v1/webhooks \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Call events",
+    "url": "https://example.com/webhook",
+    "events": ["call.started", "call.ended", "transcript.final"]
+  }'
+```
+
+<Check>
+**Save:** response `id` as **`webhook_id`**.
+</Check>
+
+</Step>
+
+<Step title="2. Test delivery">
+
+Send a test payload to your URL:
+
+```bash
+curl -X POST https://api.oneinbox.ai/v1/webhooks/<webhook_id>/test \
+  -H "Authorization: Bearer <api_key>"
+```
+
+Check your server logs for the incoming request.
+
+</Step>
+
+<Step title="3. List or update">
+
+```bash
+# List all
+curl https://api.oneinbox.ai/v1/webhooks \
+  -H "Authorization: Bearer <api_key>"
+
+# Update events
+curl -X PATCH https://api.oneinbox.ai/v1/webhooks/<webhook_id> \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "events": ["call.started", "call.ended"]
+  }'
+
+# Delete
+curl -X DELETE https://api.oneinbox.ai/v1/webhooks/<webhook_id> \
+  -H "Authorization: Bearer <api_key>"
+```
+
+</Step>
+
+</Steps>
+
+---
+
+## API reference
+
+[Create webhook](/api-reference/webhooks/create-webhook) · [List webhooks](/api-reference/webhooks/list-webhooks)
