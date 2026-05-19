@@ -22,23 +22,24 @@
       "languages": ["curl", "python", "javascript", "go"]
     }
   },
-  "navbar": {
-    "links": [
-      {
-        "label": "API",
-        "href": "https://api.oneinbox.ai"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Quickstart",
-      "href": "/quickstart/first-agent"
-    }
-  },
   "navigation": {
     "languages": [
       {
         "language": "en",
+        "default": true,
+        "navbar": {
+          "links": [
+            {
+              "label": "API",
+              "href": "https://api.oneinbox.ai"
+            }
+          ],
+          "primary": {
+            "type": "button",
+            "label": "Quickstart",
+            "href": "/quickstart/first-agent"
+          }
+        },
         "tabs": [
           {
             "tab": "Documentation",
@@ -80,6 +81,19 @@
       },
       {
         "language": "jp",
+        "navbar": {
+          "links": [
+            {
+              "label": "API",
+              "href": "https://api.oneinbox.ai"
+            }
+          ],
+          "primary": {
+            "type": "button",
+            "label": "クイックスタート",
+            "href": "/jp/quickstart/first-agent"
+          }
+        },
         "tabs": [
           {
             "tab": "ドキュメント",
@@ -90,6 +104,15 @@
                   "jp/introduction",
                   "jp/quickstart/first-agent",
                   "quickstart/phone-calls"
+                ]
+              },
+              {
+                "group": "ガイド",
+                "pages": [
+                  "guides/tools",
+                  "guides/webhooks",
+                  "guides/knowledge-bases",
+                  "guides/voices"
                 ]
               },
               {
