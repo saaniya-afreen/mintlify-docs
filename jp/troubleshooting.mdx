@@ -44,6 +44,32 @@ http://api.oneinbox.ai:8000
 
 ---
 
+## ドキュメントの curl を API キーで試す
+
+1. [ダッシュボード → API Keys](https://oneinbox-dashboard.vercel.app) でキーを作成。
+2. キー全文をコピー（一度だけ表示）。
+3. ドキュメントの curl で `<api_key>` を実際のキーに置き換え。
+4. `<llm_id>`、`<agent_id>` などは前のレスポンスの `id` に置き換え。
+
+`https://api.oneinbox.ai` が失敗する場合（Cloudflare **521** やタイムアウト）、ターミナルでは次のベース URL を使用:
+
+```
+http://api.oneinbox.ai:8000
+```
+
+例:
+
+```bash
+curl -X POST http://api.oneinbox.ai:8000/v1/models \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "My First Model", "provider": "openai", "model": "gpt-4.1-mini", "system_prompt": "You are a friendly assistant.", "temperature": 0.7, "max_tokens": 4000, "tool_ids": [], "knowledge_base_ids": []}'
+```
+
+**401** は `Bearer` の欠落やキーの誤り・失効が多いです。API キーをチャットや GitHub に貼らないでください。
+
+---
+
 ## `401 Unauthorized`
 
 | 確認 | 対処 |
