@@ -5,7 +5,7 @@ info:
   description: |
     REST API for building voice AI agents.
 
-    **Base URL:** `http://13.207.23.185:8000`
+    **Base URL:** `https://api.oneinbox.ai`
 
     ## Authentication
 
@@ -20,7 +20,7 @@ info:
     Integrations are stored at `/v1/credentials` (docs call them **Integrations**).
 
 servers:
-  - url: http://13.207.23.185:8000
+  - url: https://api.oneinbox.ai
     description: API server
 
 tags:

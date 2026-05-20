@@ -48,7 +48,7 @@ Twilio、Tenyx など **任意のテレフォニーキャリア**で **実際の
 キャリアの認証情報を OneInbox に保存します。
 
 ```bash
-curl -X POST http://13.207.23.185:8000/v1/credentials \
+curl -X POST https://api.oneinbox.ai/v1/credentials \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -83,7 +83,7 @@ curl -X POST http://13.207.23.185:8000/v1/credentials \
 検索に対応するキャリア（Twilio 等）:
 
 ```bash
-curl "http://13.207.23.185:8000/v1/phone-numbers/search?country=US&area_code=415&limit=10&credential_id=<telephony_integration_id>" \
+curl "https://api.oneinbox.ai/v1/phone-numbers/search?country=US&area_code=415&limit=10&credential_id=<telephony_integration_id>" \
   -H "Authorization: Bearer <api_key>"
 ```
 
@@ -107,7 +107,7 @@ curl "http://13.207.23.185:8000/v1/phone-numbers/search?country=US&area_code=415
 **オプション A — インテグレーション ID**（Twilio 等）:
 
 ```bash
-curl -X POST http://13.207.23.185:8000/v1/phone-numbers \
+curl -X POST https://api.oneinbox.ai/v1/phone-numbers \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -122,7 +122,7 @@ curl -X POST http://13.207.23.185:8000/v1/phone-numbers \
 **オプション B — SIP トランク**（Tenyx 等、SIP 対応キャリア）:
 
 ```bash
-curl -X POST http://13.207.23.185:8000/v1/phone-numbers \
+curl -X POST https://api.oneinbox.ai/v1/phone-numbers \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -149,7 +149,7 @@ curl -X POST http://13.207.23.185:8000/v1/phone-numbers \
 エージェントが電話番号に発信し、会話を開始します。
 
 ```bash
-curl -X POST http://13.207.23.185:8000/v1/calls \
+curl -X POST https://api.oneinbox.ai/v1/calls \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -190,7 +190,7 @@ curl -X POST http://13.207.23.185:8000/v1/calls \
 ## 通話を確認
 
 ```bash
-curl http://13.207.23.185:8000/v1/calls/<call_id> \
+curl https://api.oneinbox.ai/v1/calls/<call_id> \
   -H "Authorization: Bearer <api_key>"
 ```
 

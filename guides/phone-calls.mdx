@@ -48,7 +48,7 @@ In this guide you will:
 Store your carrier credentials in OneInbox.
 
 ```bash
-curl -X POST http://13.207.23.185:8000/v1/credentials \
+curl -X POST https://api.oneinbox.ai/v1/credentials \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -83,7 +83,7 @@ List numbers you can register. **Skip** if you only need outbound and already ha
 Number search is available for carriers that support it (e.g. Twilio):
 
 ```bash
-curl "http://13.207.23.185:8000/v1/phone-numbers/search?country=US&area_code=415&limit=10&credential_id=<telephony_integration_id>" \
+curl "https://api.oneinbox.ai/v1/phone-numbers/search?country=US&area_code=415&limit=10&credential_id=<telephony_integration_id>" \
   -H "Authorization: Bearer <api_key>"
 ```
 
@@ -107,7 +107,7 @@ Route inbound calls on this number to your agent.
 **Option A — integration ID** (Twilio and similar):
 
 ```bash
-curl -X POST http://13.207.23.185:8000/v1/phone-numbers \
+curl -X POST https://api.oneinbox.ai/v1/phone-numbers \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -122,7 +122,7 @@ curl -X POST http://13.207.23.185:8000/v1/phone-numbers \
 **Option B — SIP trunk** (any carrier with SIP, including Tenyx):
 
 ```bash
-curl -X POST http://13.207.23.185:8000/v1/phone-numbers \
+curl -X POST https://api.oneinbox.ai/v1/phone-numbers \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -149,7 +149,7 @@ Set `provider` to your carrier's value. See [Register phone number](/api-referen
 Your agent dials a phone number and starts a conversation.
 
 ```bash
-curl -X POST http://13.207.23.185:8000/v1/calls \
+curl -X POST https://api.oneinbox.ai/v1/calls \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -190,7 +190,7 @@ curl -X POST http://13.207.23.185:8000/v1/calls \
 ## Verify a call
 
 ```bash
-curl http://13.207.23.185:8000/v1/calls/<call_id> \
+curl https://api.oneinbox.ai/v1/calls/<call_id> \
   -H "Authorization: Bearer <api_key>"
 ```
 

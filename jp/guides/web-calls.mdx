@@ -28,7 +28,7 @@ Web 通話を作成すると、OneInbox は `call_id`、`server_url`、`particip
 <Step title="1. Web 通話を作成">
 
 ```bash
-curl -X POST http://13.207.23.185:8000/v1/calls/web \
+curl -X POST https://api.oneinbox.ai/v1/calls/web \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -74,7 +74,7 @@ curl -X POST http://13.207.23.185:8000/v1/calls/web \
 エージェントを更新せず、1 通話だけ TTS または LLM を変更:
 
 ```bash
-curl -X POST http://13.207.23.185:8000/v1/calls/web \
+curl -X POST https://api.oneinbox.ai/v1/calls/web \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -96,7 +96,7 @@ curl -X POST http://13.207.23.185:8000/v1/calls/web \
 <Step title="4. 通話を確認">
 
 ```bash
-curl http://13.207.23.185:8000/v1/calls/<call_id> \
+curl https://api.oneinbox.ai/v1/calls/<call_id> \
   -H "Authorization: Bearer <api_key>"
 ```
 

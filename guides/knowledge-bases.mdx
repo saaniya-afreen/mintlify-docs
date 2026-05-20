@@ -40,7 +40,7 @@ Source uploads return **`202 Accepted`** immediately. Poll the **`job_id`** unti
 <Step title="1. Create a knowledge base">
 
 ```bash
-curl -X POST http://13.207.23.185:8000/v1/knowledge-bases \
+curl -X POST https://api.oneinbox.ai/v1/knowledge-bases \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -58,7 +58,7 @@ curl -X POST http://13.207.23.185:8000/v1/knowledge-bases \
 Upload PDF, DOCX, XLSX, TXT, or MD (max **50 MiB** per file). Use `multipart/form-data`:
 
 ```bash
-curl -X POST "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/sources" \
+curl -X POST "https://api.oneinbox.ai/v1/knowledge-bases/<kb_id>/sources" \
   -H "Authorization: Bearer <api_key>" \
   -F "file=@/path/to/document.pdf"
 ```
@@ -68,7 +68,7 @@ curl -X POST "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/sources" \
 <Step title="2b. Add a URL source">
 
 ```bash
-curl -X POST "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/sources" \
+curl -X POST "https://api.oneinbox.ai/v1/knowledge-bases/<kb_id>/sources" \
   -H "Authorization: Bearer <api_key>" \
   -F "type=url" \
   -F "source=https://docs.example.com/faq"
@@ -79,7 +79,7 @@ curl -X POST "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/sources" \
 <Step title="2c. Add inline text">
 
 ```bash
-curl -X POST "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/sources" \
+curl -X POST "https://api.oneinbox.ai/v1/knowledge-bases/<kb_id>/sources" \
   -H "Authorization: Bearer <api_key>" \
   -F "type=text" \
   -F "source=Our return policy is 30 days, no questions asked."
@@ -107,7 +107,7 @@ All source uploads return **202** with a job ID:
 Poll until `completed` or `failed`:
 
 ```bash
-curl "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/jobs/<job_id>" \
+curl "https://api.oneinbox.ai/v1/knowledge-bases/<kb_id>/jobs/<job_id>" \
   -H "Authorization: Bearer <api_key>"
 ```
 
@@ -116,7 +116,7 @@ Status flow: `queued` → `running` → `completed` | `failed`. On success, `pay
 List recent jobs:
 
 ```bash
-curl "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/jobs" \
+curl "https://api.oneinbox.ai/v1/knowledge-bases/<kb_id>/jobs" \
   -H "Authorization: Bearer <api_key>"
 ```
 
@@ -125,7 +125,7 @@ curl "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/jobs" \
 <Step title="4. List sources (optional)">
 
 ```bash
-curl "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/sources" \
+curl "https://api.oneinbox.ai/v1/knowledge-bases/<kb_id>/sources" \
   -H "Authorization: Bearer <api_key>"
 ```
 
@@ -136,7 +136,7 @@ Source rows include `status` (`processing` / `ready` / `error`), `file_name`, `t
 <Step title="5. Attach to your LLM model">
 
 ```bash
-curl -X PATCH "http://13.207.23.185:8000/v1/models/<llm_id>" \
+curl -X PATCH "https://api.oneinbox.ai/v1/models/<llm_id>" \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{ "knowledge_base_ids": ["<kb_id>"] }'
@@ -153,10 +153,10 @@ Agents using this `llm_id` will use the KB on the next call.
 ## Manage knowledge bases
 
 ```bash
-curl http://13.207.23.185:8000/v1/knowledge-bases \
+curl https://api.oneinbox.ai/v1/knowledge-bases \
   -H "Authorization: Bearer <api_key>"
 
-curl -X DELETE "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>" \
+curl -X DELETE "https://api.oneinbox.ai/v1/knowledge-bases/<kb_id>" \
   -H "Authorization: Bearer <api_key>"
 ```
 

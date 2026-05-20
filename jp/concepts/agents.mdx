@@ -70,7 +70,7 @@ description: エージェントの構成とすべての設定項目の説明。
 ## エージェントの更新
 
 ```bash
-curl -X PATCH http://13.207.23.185:8000/v1/agents/<agent_id> \
+curl -X PATCH https://api.oneinbox.ai/v1/agents/<agent_id> \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{ "first_message": "Hello! Thanks for calling." }'

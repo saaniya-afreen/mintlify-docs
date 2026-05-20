@@ -59,7 +59,7 @@ Define **how your agent thinks** — default LLM and system prompt. The agent in
 | `knowledge_base_ids` | Attached knowledge bases | `[]` for now |
 
 ```bash
-curl -X POST http://13.207.23.185:8000/v1/models \
+curl -X POST https://api.oneinbox.ai/v1/models \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -116,7 +116,7 @@ Replace `<llm_id>` in the curl below with the `"id"` you copied from step 1.
 | `enable_recording` | Record the call when `true` |
 
 ```bash
-curl -X POST http://13.207.23.185:8000/v1/agents \
+curl -X POST https://api.oneinbox.ai/v1/agents \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -168,7 +168,7 @@ Create a **web call** — a voice session on OneInbox's servers. This step uses 
 Replace `<agent_id>` with the `"id"` you copied from step 2.
 
 ```bash
-curl -X POST http://13.207.23.185:8000/v1/calls/web \
+curl -X POST https://api.oneinbox.ai/v1/calls/web \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -200,7 +200,7 @@ curl -X POST http://13.207.23.185:8000/v1/calls/web \
 To **hear and speak** with your agent in a browser, continue to the [Web SDK](/concepts/web-sdk). To check call status later:
 
 ```bash
-curl http://13.207.23.185:8000/v1/calls/<call_id> \
+curl https://api.oneinbox.ai/v1/calls/<call_id> \
   -H "Authorization: Bearer <api_key>"
 ```
 

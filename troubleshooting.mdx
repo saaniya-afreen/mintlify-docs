@@ -1,44 +1,79 @@
 ---
-title: "Troubleshooting"
-description: "## \"Next.js hydration error\" with `data-layerpath-*` on `<html>`"
+title: Troubleshooting
+description: Common API, dashboard, and browser issues when calling OneInbox.
 ---
 
-## "Next.js hydration error" with `data-layerpath-*` on `<html>`
+## Base URL
 
-If the console shows **Next.js 16** and attributes like:
+All examples in this documentation use:
 
-```html
-data-layerpath-loaded="true"
-data-layerpath-ready="true"
+```
+https://api.oneinbox.ai
 ```
 
-on the `<html>` tag, that is **not from this Docusaurus site**. A browser extension (LayerPath) is modifying the page before React hydrates.
+Use this URL in the [dashboard](https://oneinbox-dashboard.vercel.app), your backend, and browser apps.
 
-### Fix
+---
 
-1. Disable the **LayerPath** extension (Chrome → Extensions → LayerPath → Off).
-2. Hard-refresh the page (`Cmd+Shift+R`).
-3. Confirm you are running **this** docs server:
+## Dashboard or browser cannot reach the API
 
-   ```bash
-   cd docs-site
-   npm start
-   ```
+If requests from `https://oneinbox-dashboard.vercel.app` (or your site) fail in the browser but **curl works**, check two separate browser rules:
 
-   Open **http://localhost:3001/** (port **3001** avoids conflicts with Next.js on 3000).
+| Symptom | Likely cause | Fix |
+| --- | --- | --- |
+| `Mixed Content` in the console | HTTPS page calling an HTTP API | Use **`https://api.oneinbox.ai`** — browsers block HTTP API calls from HTTPS pages |
+| `blocked by CORS policy` | API not returning CORS headers | OneInbox returns `Access-Control-Allow-Origin: *` — redeploy backend **v0.2.6+** if you still see CORS errors |
 
-4. If you also run a separate Next.js app on port 3000, do not open that URL for OneInbox docs.
+**CORS and HTTPS are different fixes.** Wildcard CORS allows cross-origin reads once the request is allowed. HTTPS is still required so the browser sends the request at all.
 
-### If you maintain a Next.js app separately
+### Recommended setup
 
-Add `suppressHydrationWarning` to `<html>` and `<body>` in `src/app/layout.tsx`:
+1. **HTTPS on `api.oneinbox.ai`** — TLS on port 443 with a reverse proxy (Caddy, ALB, or Cloudflare) forwarding to the API process.
+2. **Dashboard env** — set the API base URL to `https://api.oneinbox.ai` (no port in the URL when the proxy handles it).
+3. **CORS** — already enabled with wildcard origin on the API.
 
-```tsx
-<html lang="en" suppressHydrationWarning className={...}>
-  <body suppressHydrationWarning className={...}>
-    {children}
-  </body>
-</html>
+### Temporary: curl and server-side only
+
+If HTTPS on port 443 is not live yet, you can still test with **curl**, Postman, or a **backend server** using:
+
+```
+http://api.oneinbox.ai:8000
 ```
 
-This silences extension-injected attribute mismatches during development. Prefer disabling the extension when possible.
+Do **not** use that HTTP URL from the dashboard or any JavaScript running in the browser.
+
+---
+
+## `401 Unauthorized`
+
+| Check | Action |
+| --- | --- |
+| Header format | `Authorization: Bearer <api_key>` — include the word `Bearer` and a space |
+| Key source | Create or copy the key from [Dashboard → API Keys](https://oneinbox-dashboard.vercel.app) |
+| Revoked key | Create a new key if the old one was deleted |
+
+---
+
+## Local docs preview
+
+Run the Mintlify dev server from the docs repo:
+
+```bash
+cd mintlify
+npm install
+npm run dev
+```
+
+Open **http://localhost:3333** — not port 3000 (often used by Next.js apps).
+
+---
+
+## Mintlify broken links
+
+From the `mintlify` folder:
+
+```bash
+npx mintlify broken-links
+```
+
+Fix any reported paths before publishing.

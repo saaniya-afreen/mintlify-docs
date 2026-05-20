@@ -40,7 +40,7 @@ OneInbox は KB の合計トークン予算（デフォルト **1 万トーク�
 <Step title="1. ナレッジベースを作成">
 
 ```bash
-curl -X POST http://13.207.23.185:8000/v1/knowledge-bases \
+curl -X POST https://api.oneinbox.ai/v1/knowledge-bases \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -58,7 +58,7 @@ curl -X POST http://13.207.23.185:8000/v1/knowledge-bases \
 PDF、DOCX、XLSX、TXT、MD をアップロード（1 ファイル最大 **50 MiB**）。`multipart/form-data` を使用:
 
 ```bash
-curl -X POST "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/sources" \
+curl -X POST "https://api.oneinbox.ai/v1/knowledge-bases/<kb_id>/sources" \
   -H "Authorization: Bearer <api_key>" \
   -F "file=@/path/to/document.pdf"
 ```
@@ -68,7 +68,7 @@ curl -X POST "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/sources" \
 <Step title="2b. URL ソースを追加">
 
 ```bash
-curl -X POST "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/sources" \
+curl -X POST "https://api.oneinbox.ai/v1/knowledge-bases/<kb_id>/sources" \
   -H "Authorization: Bearer <api_key>" \
   -F "type=url" \
   -F "source=https://docs.example.com/faq"
@@ -79,7 +79,7 @@ curl -X POST "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/sources" \
 <Step title="2c. インラインテキストを追加">
 
 ```bash
-curl -X POST "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/sources" \
+curl -X POST "https://api.oneinbox.ai/v1/knowledge-bases/<kb_id>/sources" \
   -H "Authorization: Bearer <api_key>" \
   -F "type=text" \
   -F "source=Our return policy is 30 days, no questions asked."
@@ -107,7 +107,7 @@ curl -X POST "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/sources" \
 `completed` または `failed` までポーリング:
 
 ```bash
-curl "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/jobs/<job_id>" \
+curl "https://api.oneinbox.ai/v1/knowledge-bases/<kb_id>/jobs/<job_id>" \
   -H "Authorization: Bearer <api_key>"
 ```
 
@@ -116,7 +116,7 @@ curl "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/jobs/<job_id>" \
 最近のジョブ一覧:
 
 ```bash
-curl "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/jobs" \
+curl "https://api.oneinbox.ai/v1/knowledge-bases/<kb_id>/jobs" \
   -H "Authorization: Bearer <api_key>"
 ```
 
@@ -125,7 +125,7 @@ curl "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/jobs" \
 <Step title="4. ソース一覧（任意）">
 
 ```bash
-curl "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/sources" \
+curl "https://api.oneinbox.ai/v1/knowledge-bases/<kb_id>/sources" \
   -H "Authorization: Bearer <api_key>"
 ```
 
@@ -136,7 +136,7 @@ curl "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>/sources" \
 <Step title="5. LLM モデルに紐付け">
 
 ```bash
-curl -X PATCH "http://13.207.23.185:8000/v1/models/<llm_id>" \
+curl -X PATCH "https://api.oneinbox.ai/v1/models/<llm_id>" \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{ "knowledge_base_ids": ["<kb_id>"] }'
@@ -153,10 +153,10 @@ curl -X PATCH "http://13.207.23.185:8000/v1/models/<llm_id>" \
 ## ナレッジベースの管理
 
 ```bash
-curl http://13.207.23.185:8000/v1/knowledge-bases \
+curl https://api.oneinbox.ai/v1/knowledge-bases \
   -H "Authorization: Bearer <api_key>"
 
-curl -X DELETE "http://13.207.23.185:8000/v1/knowledge-bases/<kb_id>" \
+curl -X DELETE "https://api.oneinbox.ai/v1/knowledge-bases/<kb_id>" \
   -H "Authorization: Bearer <api_key>"
 ```
 

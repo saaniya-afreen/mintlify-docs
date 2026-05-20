@@ -1,0 +1,79 @@
+---
+title: トラブルシューティング
+description: OneInbox API・ダッシュボード・ブラウザ呼び出しのよくある問題。
+---
+
+## ベース URL
+
+このドキュメントの例はすべて次を使用します:
+
+```
+https://api.oneinbox.ai
+```
+
+[ダッシュボード](https://oneinbox-dashboard.vercel.app)、バックエンド、ブラウザアプリではこの URL を使ってください。
+
+---
+
+## ダッシュボードやブラウザから API に届かない
+
+`https://oneinbox-dashboard.vercel.app`（または自サイト）からのリクエストがブラウザで失敗し、**curl は成功する**場合、ブラウザの別ルールを確認してください:
+
+| 症状 | 想定原因 | 対処 |
+| --- | --- | --- |
+| コンソールに `Mixed Content` | HTTPS ページから HTTP API を呼んでいる | **`https://api.oneinbox.ai`** を使用 — ブラウザは HTTPS ページからの HTTP API 呼び出しをブロックします |
+| `blocked by CORS policy` | API が CORS ヘッダーを返していない | OneInbox は `Access-Control-Allow-Origin: *` を返します — まだ CORS エラーならバックエンド **v0.2.6 以降** を再デプロイ |
+
+**CORS と HTTPS は別問題です。** ワイルドカード CORS は、リクエストが許可された後のクロスオリジン読み取りを可能にします。ブラウザがリクエストを送るには HTTPS が必要です。
+
+### 推奨構成
+
+1. **`api.oneinbox.ai` で HTTPS** — 443 で TLS を終端し、リバースプロキシ（Caddy、ALB、Cloudflare）で API プロセスに転送。
+2. **ダッシュボードの環境変数** — API ベース URL を `https://api.oneinbox.ai` に（プロキシ経由ならポート番号なし）。
+3. **CORS** — API ではワイルドカードオリジンが有効。
+
+### 一時的: curl とサーバー側のみ
+
+443 の HTTPS がまだ有効でない場合、**curl**、Postman、**バックエンドサーバー** では次でテストできます:
+
+```
+http://api.oneinbox.ai:8000
+```
+
+ダッシュボードやブラウザ内 JavaScript からは、この HTTP URL を **使わないでください**。
+
+---
+
+## `401 Unauthorized`
+
+| 確認 | 対処 |
+| --- | --- |
+| ヘッダー形式 | `Authorization: Bearer <api_key>` — `Bearer` とスペースを含める |
+| キーの取得 | [ダッシュボード → API Keys](https://oneinbox-dashboard.vercel.app) で作成・コピー |
+| 失効したキー | 削除済みなら新しいキーを作成 |
+
+---
+
+## ローカルでドキュメントをプレビュー
+
+ドキュメントリポジトリから Mintlify 開発サーバーを起動:
+
+```bash
+cd mintlify
+npm install
+npm run dev
+```
+
+**http://localhost:3333** を開く — 3000 番（Next.js でよく使われる）ではありません。
+
+---
+
+## Mintlify のリンク切れ
+
+`mintlify` フォルダで:
+
+```bash
+npx mintlify broken-links
+```
+
+公開前に報告されたパスを修正してください。

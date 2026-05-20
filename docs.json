@@ -35,7 +35,7 @@
             },
             {
               "label": "API",
-              "href": "http://13.207.23.185:8000"
+              "href": "https://api.oneinbox.ai"
             }
           ],
           "primary": {
@@ -50,7 +50,7 @@
             "groups": [
               {
                 "group": "Get started",
-                "pages": ["introduction"]
+                "pages": ["introduction", "troubleshooting"]
               },
               {
                 "group": "Guides",
@@ -92,7 +92,7 @@
             },
             {
               "label": "API",
-              "href": "http://13.207.23.185:8000"
+              "href": "https://api.oneinbox.ai"
             }
           ],
           "primary": {
@@ -107,7 +107,7 @@
             "groups": [
               {
                 "group": "はじめる",
-                "pages": ["jp/introduction"]
+                "pages": ["jp/introduction", "jp/troubleshooting"]
               },
               {
                 "group": "ガイド",

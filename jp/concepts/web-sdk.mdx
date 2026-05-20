@@ -76,7 +76,7 @@ app.use(express.json());
 
 app.post('/api/start-call', async (req, res) => {
   try {
-    const response = await fetch('http://13.207.23.185:8000/v1/calls/web', {
+    const response = await fetch('https://api.oneinbox.ai/v1/calls/web', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.ONEINBOX_API_KEY}`,

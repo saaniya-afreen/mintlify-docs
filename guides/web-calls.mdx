@@ -28,7 +28,7 @@ OneInbox returns `call_id`, `server_url`, and `participant_token` when you creat
 <Step title="1. Create a web call">
 
 ```bash
-curl -X POST http://13.207.23.185:8000/v1/calls/web \
+curl -X POST https://api.oneinbox.ai/v1/calls/web \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -74,7 +74,7 @@ Reference in your system prompt: `The customer name is {{customer_name}}.`
 Change TTS or LLM for a single call without updating the agent:
 
 ```bash
-curl -X POST http://13.207.23.185:8000/v1/calls/web \
+curl -X POST https://api.oneinbox.ai/v1/calls/web \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -96,7 +96,7 @@ See [Start web call](/api-reference/calls/start-web-call) and [Voices](/guides/v
 <Step title="4. Verify the call">
 
 ```bash
-curl http://13.207.23.185:8000/v1/calls/<call_id> \
+curl https://api.oneinbox.ai/v1/calls/<call_id> \
   -H "Authorization: Bearer <api_key>"
 ```
 

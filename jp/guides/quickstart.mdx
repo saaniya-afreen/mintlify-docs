@@ -59,7 +59,7 @@ API キーをコピーし、以下の curl すべてで `Authorization: Bearer <
 | `knowledge_base_ids` | ナレッジベース | `[]` |
 
 ```bash
-curl -X POST http://13.207.23.185:8000/v1/models \
+curl -X POST https://api.oneinbox.ai/v1/models \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -116,7 +116,7 @@ curl -X POST http://13.207.23.185:8000/v1/models \
 | `enable_recording` | `true` で録音 |
 
 ```bash
-curl -X POST http://13.207.23.185:8000/v1/agents \
+curl -X POST https://api.oneinbox.ai/v1/agents \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -168,7 +168,7 @@ curl -X POST http://13.207.23.185:8000/v1/agents \
 `<agent_id>` をステップ 2 でコピーした `"id"` に置き換えます。
 
 ```bash
-curl -X POST http://13.207.23.185:8000/v1/calls/web \
+curl -X POST https://api.oneinbox.ai/v1/calls/web \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -200,7 +200,7 @@ curl -X POST http://13.207.23.185:8000/v1/calls/web \
 ブラウザでエージェントと **聞き・話す** には [Web SDK](/jp/concepts/web-sdk) へ進んでください。通話ステータスを確認する場合:
 
 ```bash
-curl http://13.207.23.185:8000/v1/calls/<call_id> \
+curl https://api.oneinbox.ai/v1/calls/<call_id> \
   -H "Authorization: Bearer <api_key>"
 ```
 

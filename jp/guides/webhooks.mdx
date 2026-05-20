@@ -22,7 +22,7 @@ description: 通話イベントを自社サーバーで受信する。
 <Step title="1. Webhook を作成">
 
 ```bash
-curl -X POST http://13.207.23.185:8000/v1/webhooks \
+curl -X POST https://api.oneinbox.ai/v1/webhooks \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -40,7 +40,7 @@ curl -X POST http://13.207.23.185:8000/v1/webhooks \
 URL へテストペイロードを送信:
 
 ```bash
-curl -X POST http://13.207.23.185:8000/v1/webhooks/<webhook_id>/test \
+curl -X POST https://api.oneinbox.ai/v1/webhooks/<webhook_id>/test \
   -H "Authorization: Bearer <api_key>"
 ```
 
@@ -52,11 +52,11 @@ curl -X POST http://13.207.23.185:8000/v1/webhooks/<webhook_id>/test \
 
 ```bash
 # 一覧
-curl http://13.207.23.185:8000/v1/webhooks \
+curl https://api.oneinbox.ai/v1/webhooks \
   -H "Authorization: Bearer <api_key>"
 
 # イベント更新
-curl -X PATCH http://13.207.23.185:8000/v1/webhooks/<webhook_id> \
+curl -X PATCH https://api.oneinbox.ai/v1/webhooks/<webhook_id> \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -64,7 +64,7 @@ curl -X PATCH http://13.207.23.185:8000/v1/webhooks/<webhook_id> \
   }'
 
 # 削除
-curl -X DELETE http://13.207.23.185:8000/v1/webhooks/<webhook_id> \
+curl -X DELETE https://api.oneinbox.ai/v1/webhooks/<webhook_id> \
   -H "Authorization: Bearer <api_key>"
 ```
 

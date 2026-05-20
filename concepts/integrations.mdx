@@ -28,7 +28,7 @@ Integrations are **optional** for the first-agent quickstart — OneInbox provid
 ## How to create one
 
 ```bash
-curl -X POST http://13.207.23.185:8000/v1/credentials \
+curl -X POST https://api.oneinbox.ai/v1/credentials \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -60,7 +60,7 @@ Telephony integrations power [Phone calls](/guides/phone-calls) via `credential_
 ## Manage integrations
 
 ```bash
-curl http://13.207.23.185:8000/v1/credentials \
+curl https://api.oneinbox.ai/v1/credentials \
   -H "Authorization: Bearer <api_key>"
 ```
 
