@@ -38,10 +38,6 @@ flowchart LR
 
 Copy your API key and use `Authorization: Bearer <api_key>` in every curl below. More detail → [Authentication](/concepts/authentication)
 
-<Warning>
-**Testing curl today:** Examples use `https://api.oneinbox.ai`. If you get a Cloudflare error or connection failure, replace that base URL with **`http://api.oneinbox.ai:8000`** in each command — same API key, same headers. Use curl, Postman, or Terminal only (not the browser). When `https://api.oneinbox.ai/v1/health` returns JSON, switch back to the HTTPS URL in the docs.
-</Warning>
-
 **How to run each step:** open Terminal (Mac), PowerShell, or WSL. Copy the curl command, replace every placeholder (e.g. `<api_key>` → your real key), paste into the terminal, and press Enter. If the response is JSON with an `"id"` field, the step worked.
 
 You do **not** need a phone number or vendor integrations. [Integrations](/concepts/integrations) are optional when you want your own provider billing (BYOK) or a telephony carrier.

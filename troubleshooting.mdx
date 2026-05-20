@@ -44,32 +44,6 @@ Do **not** use that HTTP URL from the dashboard or any JavaScript running in the
 
 ---
 
-## Test doc curl commands with your API key
-
-1. Create a key in [Dashboard → API Keys](https://oneinbox-dashboard.vercel.app).
-2. Copy the full key (shown once).
-3. In any doc curl, replace `<api_key>` with your real key.
-4. Replace `<llm_id>`, `<agent_id>`, and other placeholders with `id` values from previous responses.
-
-If `https://api.oneinbox.ai` fails (Cloudflare **521** or timeout), use this base URL in Terminal only:
-
-```
-http://api.oneinbox.ai:8000
-```
-
-Example:
-
-```bash
-curl -X POST http://api.oneinbox.ai:8000/v1/models \
-  -H "Authorization: Bearer <api_key>" \
-  -H "Content-Type: application/json" \
-  -d '{"name": "My First Model", "provider": "openai", "model": "gpt-4.1-mini", "system_prompt": "You are a friendly assistant.", "temperature": 0.7, "max_tokens": 4000, "tool_ids": [], "knowledge_base_ids": []}'
-```
-
-**401** usually means a missing `Bearer` prefix or a wrong/revoked key. Do not paste API keys in chat, GitHub, or screenshots.
-
----
-
 ## `401 Unauthorized`
 
 | Check | Action |

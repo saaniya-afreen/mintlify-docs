@@ -38,10 +38,6 @@ flowchart LR
 
 API キーをコピーし、以下の curl すべてで `Authorization: Bearer <api_key>` を使用します。詳細 → [認証](/jp/concepts/authentication)
 
-<Warning>
-**curl で試す場合:** 例は `https://api.oneinbox.ai` です。Cloudflare エラーや接続失敗のときは、各コマンドのベース URL を **`http://api.oneinbox.ai:8000`** に置き換えてください — API キーとヘッダーは同じです。curl・Postman・ターミナルのみ（ブラウザ不可）。`https://api.oneinbox.ai/v1/health` が JSON を返すようになったら、ドキュメントの HTTPS URL に戻してください。
-</Warning>
-
 **各ステップの実行方法:** ターミナル（Mac）、PowerShell、または WSL を開きます。curl コマンドをコピーし、プレースホルダー（例: `<api_key>` → 実際のキー）を置き換え、ターミナルに貼り付けて Enter を押します。JSON レスポンスに `"id"` があれば成功です。
 
 電話番号・ベンダー連携は不要です。[インテグレーション](/jp/concepts/integrations)は BYOK やテレフォニーキャリアが必要な場合のみ任意です。
